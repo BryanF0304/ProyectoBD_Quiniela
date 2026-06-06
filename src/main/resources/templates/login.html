@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Iniciar sesion - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4" style="max-width: 420px;">
+    <h1 class="h3 mb-3">Iniciar sesion</h1>
+
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <form th:action="@{/login}" th:object="${loginForm}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Nombre de usuario</label>
+            <input type="text" class="form-control" th:field="*{nombreUsuario}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contrasena</label>
+            <input type="password" class="form-control" th:field="*{contrasena}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+        <a class="btn btn-link" th:href="@{/registro}">Crear cuenta</a>
+    </form>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
