@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Panel de administracion - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4">
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <h1 class="h3">Panel de administracion</h1>
+    <p class="text-muted" th:text="'Bienvenido, ' + ${session.usuario.nombreCompleto}">Bienvenido</p>
+
+    <div class="row mt-3 g-3">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Quinielas</h5>
+                    <p class="card-text text-muted">Crear y administrar quinielas.</p>
+                    <a class="btn btn-primary" th:href="@{/admin/quinielas/nueva}">Crear quiniela</a>
+                    <a class="btn btn-outline-secondary" th:href="@{/quinielas}">Ver todas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Partidos</h5>
+                    <p class="card-text text-muted">Registrar partidos y asociarlos a quinielas.</p>
+                    <a class="btn btn-primary" th:href="@{/admin/partidos}">Gestionar partidos</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Resultados</h5>
+                    <p class="card-text text-muted">Registra el marcador final de cada partido para calcular los puntos.</p>
+                    <a class="btn btn-primary" th:href="@{/admin/partidos}">Registrar resultados</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
