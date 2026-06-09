@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Nueva quiniela - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4" style="max-width: 640px;">
+    <h1 class="h3 mb-3">Nueva quiniela</h1>
+
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <form th:action="@{/admin/quinielas}" th:object="${quinielaForm}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" th:field="*{nombre}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Descripcion</label>
+            <textarea class="form-control" rows="2" th:field="*{descripcion}"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Reglas</label>
+            <textarea class="form-control" rows="3" th:field="*{reglas}"></textarea>
+        </div>
+        <div class="row">
+            <div class="col mb-3">
+                <label class="form-label">Inicio de inscripciones</label>
+                <input type="date" class="form-control" th:field="*{fechaInicio}" required>
+            </div>
+            <div class="col mb-3">
+                <label class="form-label">Cierre de inscripciones</label>
+                <input type="date" class="form-control" th:field="*{fechaCierre}" required>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Modalidad</label>
+            <select class="form-select" th:field="*{modalidad}" required>
+                <option value="">Selecciona...</option>
+                <option value="publica">Publica</option>
+                <option value="privada">Privada</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Crear</button>
+        <a class="btn btn-link" th:href="@{/quinielas}">Cancelar</a>
+    </form>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

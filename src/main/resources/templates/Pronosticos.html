@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Mis pronosticos - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4" style="max-width: 820px;">
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <h1 class="h3" th:text="'Pronosticos: ' + ${quiniela.nombre}">Pronosticos</h1>
+    <p class="text-muted">Ingresa tu marcador para cada partido antes de que inicie.</p>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(partidos)}">
+        Esta quiniela aun no tiene partidos.
+    </div>
+
+    <table class="table align-middle" th:unless="${#lists.isEmpty(partidos)}">
+        <thead>
+        <tr>
+            <th>Partido</th>
+            <th>Fecha y hora</th>
+            <th>Tu pronostico</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${partidos}">
+            <td th:text="${p.equipoLocal + ' vs ' + p.equipoVisita}">partido</td>
+            <td th:text="${p.fechaHora}">fecha</td>
+            <td>
+                <th:block th:if="${misPronosticos.containsKey(p.idPartido)}">
+                    <strong th:text="${misPronosticos.get(p.idPartido).golesLocal + ' - ' + misPronosticos.get(p.idPartido).golesVisita}">x - y</strong>
+                    <span class="badge bg-info ms-2"
+                          th:if="${misPronosticos.get(p.idPartido).puntos != null}"
+                          th:text="${misPronosticos.get(p.idPartido).puntos + ' pts'}">pts</span>
+                </th:block>
+
+                <th:block th:unless="${misPronosticos.containsKey(p.idPartido)}">
+                    <form th:if="${p.pronosticable}"
+                          th:action="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}"
+                          method="post" class="d-flex gap-1 align-items-center">
+                        <input type="hidden" name="idPartido" th:value="${p.idPartido}">
+                        <input type="number" name="golesLocal" min="0" required
+                               class="form-control form-control-sm" style="width:70px">
+                        <span>-</span>
+                        <input type="number" name="golesVisita" min="0" required
+                               class="form-control form-control-sm" style="width:70px">
+                        <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                    </form>
+                    <span class="text-muted" th:unless="${p.pronosticable}">
+                        Cerrado (ya inicio o finalizo)
+                    </span>
+                </th:block>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a class="btn btn-link" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">Volver a la quiniela</a>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

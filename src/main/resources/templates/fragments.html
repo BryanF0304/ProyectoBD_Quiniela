@@ -23,6 +23,9 @@
             </th:block>
 
             <th:block th:if="${session.usuario != null}">
+                <a class="nav-link" th:href="@{/quinielas}">Quinielas</a>
+                <a class="nav-link" th:if="${session.usuario.esAdministrador()}"
+                   th:href="@{/admin}">Admin</a>
                 <span class="navbar-text text-light me-3"
                       th:text="'Hola, ' + ${session.usuario.nombreUsuario}">Hola</span>
                 <a class="nav-link" th:href="@{/logout}">Salir</a>
@@ -34,6 +37,7 @@
 <div th:fragment="alerts">
     <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-danger" th:if="${param.error}" th:text="${param.error}"></div>
 </div>
 
 <footer th:fragment="footer" class="text-center text-muted py-4 mt-5 border-top">

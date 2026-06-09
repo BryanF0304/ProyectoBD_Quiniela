@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Partidos - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4">
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <h1 class="h3 mb-3">Partidos</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h6 mb-3">Registrar partido</h2>
+            <form th:action="@{/admin/partidos}" th:object="${partidoForm}" method="post"
+                  class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Local</label>
+                    <select class="form-select" th:field="*{idEquipoLocal}" required>
+                        <option value="">Selecciona...</option>
+                        <option th:each="e : ${equipos}"
+                                th:value="${e.idEquipo}" th:text="${e.nombre}">equipo</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Visitante</label>
+                    <select class="form-select" th:field="*{idEquipoVisita}" required>
+                        <option value="">Selecciona...</option>
+                        <option th:each="e : ${equipos}"
+                                th:value="${e.idEquipo}" th:text="${e.nombre}">equipo</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Fecha y hora</label>
+                    <input type="datetime-local" class="form-control" th:field="*{fechaHora}" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h2 class="h6">Partidos registrados</h2>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(partidos)}">
+        Todavia no hay partidos registrados.
+    </div>
+
+    <table class="table table-striped align-middle" th:unless="${#lists.isEmpty(partidos)}">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Local</th>
+            <th>Visitante</th>
+            <th>Fecha y hora</th>
+            <th>Estado</th>
+            <th>Marcador</th>
+            <th>Registrar resultado</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${partidos}">
+            <td th:text="${p.idPartido}">1</td>
+            <td th:text="${p.equipoLocal}">local</td>
+            <td th:text="${p.equipoVisita}">visita</td>
+            <td th:text="${p.fechaHora}">fecha</td>
+            <td>
+                <span class="badge"
+                      th:classappend="${p.estado == 'finalizado'} ? 'bg-dark' : (${p.estado == 'en curso'} ? 'bg-warning text-dark' : 'bg-secondary')"
+                      th:text="${p.estado}">estado</span>
+            </td>
+            <td th:text="${p.golesLocal != null} ? (${p.golesLocal} + ' - ' + ${p.golesVisita}) : '—'">—</td>
+            <td>
+                <span th:if="${p.estado == 'finalizado'}" class="text-muted">Finalizado</span>
+                <form th:unless="${p.estado == 'finalizado'}"
+                      th:action="@{/admin/partidos/{id}/resultado(id=${p.idPartido})}" method="post"
+                      class="d-flex gap-1 align-items-center">
+                    <input type="number" name="golesLocal" min="0" required
+                           class="form-control form-control-sm" style="width:64px">
+                    <span>-</span>
+                    <input type="number" name="golesVisita" min="0" required
+                           class="form-control form-control-sm" style="width:64px">
+                    <button type="submit" class="btn btn-sm btn-success">Finalizar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
