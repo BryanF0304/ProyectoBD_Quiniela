@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Ranking - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4" style="max-width: 720px;">
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <h1 class="h3" th:text="'Ranking: ' + ${quiniela.nombre}">Ranking</h1>
+
+    <div class="alert alert-info" th:if="${#lists.isEmpty(ranking)}">
+        Aun no hay participantes inscritos en esta quiniela.
+    </div>
+
+    <table class="table align-middle" th:unless="${#lists.isEmpty(ranking)}">
+        <thead>
+        <tr>
+            <th>Posicion</th>
+            <th>Usuario</th>
+            <th>Puntaje total</th>
+            <th>Partidos pronosticados</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${ranking}"
+            th:classappend="${r.idUsuario == miId} ? 'table-primary'">
+            <td th:text="${r.posicion}">1</td>
+            <td>
+                <span th:text="${r.nombreUsuario}">usuario</span>
+                <span class="badge bg-primary ms-1" th:if="${r.idUsuario == miId}">tu</span>
+            </td>
+            <td th:text="${r.puntajeTotal}">0</td>
+            <td th:text="${r.partidosPronosticados}">0</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a class="btn btn-link" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">Volver a la quiniela</a>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

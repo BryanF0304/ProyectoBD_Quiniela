@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Quiniela - Quiniela UNA')}"></head>
+
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container mt-4" style="max-width: 760px;">
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <div class="d-flex justify-content-between align-items-start">
+        <h1 class="h3" th:text="${quiniela.nombre}">Nombre</h1>
+        <span class="badge"
+              th:classappend="${quiniela.estado == 'abierta'} ? 'bg-success' : (${quiniela.estado == 'finalizada'} ? 'bg-dark' : 'bg-secondary')"
+              th:text="${quiniela.estado}">estado</span>
+    </div>
+
+    <p class="text-muted" th:text="${quiniela.descripcion}">Descripcion</p>
+
+    <a class="btn btn-outline-secondary btn-sm mb-3"
+       th:href="@{/quinielas/{id}/ranking(id=${quiniela.idQuiniela})}">Ver ranking</a>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <ul class="list-unstyled mb-2">
+                <li><strong>Modalidad:</strong> <span th:text="${quiniela.modalidad}">m</span></li>
+                <li><strong>Inscripciones:</strong>
+                    <span th:text="${quiniela.fechaInicio}">inicio</span> a
+                    <span th:text="${quiniela.fechaCierre}">cierre</span></li>
+                <li><strong>Tipo de puntuacion:</strong> <span th:text="${quiniela.tipoPuntuacion}">t</span></li>
+            </ul>
+            <div th:if="${quiniela.reglas != null and !quiniela.reglas.isEmpty()}">
+                <strong>Reglas:</strong>
+                <p class="mb-0" th:text="${quiniela.reglas}">reglas</p>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h5">Partidos</h2>
+    <ul class="list-group mb-3" th:if="${not #lists.isEmpty(partidos)}">
+        <li class="list-group-item d-flex justify-content-between align-items-center"
+            th:each="p : ${partidos}">
+            <span>
+                <span th:text="${p.equipoLocal}">L</span> vs <span th:text="${p.equipoVisita}">V</span>
+                <small class="text-muted ms-2" th:text="${p.fechaHora}">fecha</small>
+            </span>
+            <span>
+                <span class="badge bg-secondary" th:text="${p.estado}">estado</span>
+                <span class="ms-2" th:if="${p.golesLocal != null}"
+                      th:text="${p.golesLocal + ' - ' + p.golesVisita}">x - y</span>
+            </span>
+        </li>
+    </ul>
+    <p class="text-muted" th:if="${#lists.isEmpty(partidos)}">Esta quiniela aun no tiene partidos.</p>
+
+    <div th:if="${session.usuario.esAdministrador()}" class="card mb-3">
+        <div class="card-body">
+            <h2 class="h6">Agregar partido (admin)</h2>
+            <form th:action="@{/admin/quinielas/{id}/partidos(id=${quiniela.idQuiniela})}" method="post"
+                  class="row g-2 align-items-end">
+                <div class="col-md-9">
+                    <select class="form-select" name="idPartido" required>
+                        <option value="">Selecciona un partido...</option>
+                        <option th:each="d : ${disponibles}" th:value="${d.idPartido}"
+                                th:text="${d.equipoLocal + ' vs ' + d.equipoVisita + ' (' + d.fechaHora + ')'}">partido</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Agregar</button>
+                </div>
+            </form>
+            <p class="text-muted small mb-0 mt-2" th:if="${#lists.isEmpty(disponibles)}">
+                No hay partidos disponibles. Crea partidos en Admin &rarr; Partidos.
+            </p>
+        </div>
+    </div>
+
+    <h2 class="h5">Participantes (<span th:text="${#lists.size(participantes)}">0</span>)</h2>
+    <ul class="list-group mb-3" th:if="${not #lists.isEmpty(participantes)}">
+        <li class="list-group-item" th:each="p : ${participantes}" th:text="${p}">usuario</li>
+    </ul>
+    <p class="text-muted" th:if="${#lists.isEmpty(participantes)}">Aun no hay inscritos.</p>
+
+    <div th:if="${inscrito}" class="alert alert-info d-flex justify-content-between align-items-center">
+        <span>Ya estas inscrito en esta quiniela.</span>
+        <a class="btn btn-sm btn-primary"
+           th:href="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}">Mis pronosticos</a>
+    </div>
+
+    <div th:if="${not inscrito and quiniela.estado == 'abierta'}" class="card">
+        <div class="card-body">
+            <h2 class="h6">Inscribirme</h2>
+            <form th:action="@{/quinielas/{id}/inscribir(id=${quiniela.idQuiniela})}" method="post">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox"
+                           name="aceptoReglas" value="true" id="acepto">
+                    <label class="form-check-label" for="acepto">
+                        Acepto las reglas de la quiniela
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">Inscribirme</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${not inscrito and quiniela.estado != 'abierta'}" class="alert alert-warning">
+        Las inscripciones para esta quiniela estan cerradas.
+    </div>
+
+    <a class="btn btn-link mt-3 d-block" th:href="@{/quinielas}">Volver a quinielas</a>
+</div>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
