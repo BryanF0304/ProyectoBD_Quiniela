@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiniela UNA — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   DESIGN TOKENS
+================================================================ */
+:root {
+  --color-primary-50:  #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+
+  --color-navy-700: #1e3a5f;
+  --color-navy-800: #162d4a;
+  --color-navy-900: #0f1f33;
+
+  --color-white:    #ffffff;
+  --color-gray-50:  #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  --badge-abierta-bg:   #dcfce7; --badge-abierta-text:    #15803d; --badge-abierta-border:  #86efac;
+  --badge-cerrado-bg:   #f3f4f6; --badge-cerrado-text:    #4b5563; --badge-cerrado-border:  #d1d5db;
+  --badge-pendiente-bg: #fef9c3; --badge-pendiente-text:  #a16207; --badge-pendiente-border:#fde047;
+  --badge-finalizado-bg:#1f2937; --badge-finalizado-text: #f9fafb; --badge-finalizado-border:#374151;
+
+  --badge-1pt-bg:   #dbeafe; --badge-1pt-text:   #1d4ed8; --badge-1pt-border:  #93c5fd;
+  --badge-3pt-bg:   #fef3c7; --badge-3pt-text:   #92400e; --badge-3pt-border:  #fcd34d;
+  --badge-0pt-bg:   #fee2e2; --badge-0pt-text:   #b91c1c; --badge-0pt-border:  #fca5a5;
+
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+
+  --space-1:  0.25rem; --space-2:  0.5rem;  --space-3:  0.75rem;
+  --space-4:  1rem;    --space-5:  1.25rem; --space-6:  1.5rem;
+  --space-8:  2rem;    --space-10: 2.5rem;  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --radius-sm:   0.25rem; --radius-md:   0.5rem;
+  --radius-lg:   0.75rem; --radius-xl:   1rem;
+  --radius-full: 9999px;
+
+  --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10);
+  --shadow-nav:  0 2px 12px 0 rgb(0 0 0 / 0.20);
+  --duration-slow: 300ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================================================
+   BASE
+================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-gray-800);
+  background: var(--color-gray-50);
+  line-height: 1.5;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ================================================================
+   SHOWCASE LAYOUT
+================================================================ */
+.ds-page { max-width: 1100px; margin: 0 auto; padding: var(--space-12) var(--space-6); }
+.ds-hero {
+  background: linear-gradient(135deg, var(--color-navy-900) 0%, var(--color-navy-800) 60%, var(--color-primary-800) 100%);
+  color: var(--color-white);
+  padding: var(--space-12) var(--space-8);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-12);
+  position: relative; overflow: hidden;
+}
+.ds-hero::after {
+  content: '⚽'; font-size: 120px; position: absolute;
+  right: var(--space-8); top: 50%; transform: translateY(-50%);
+  opacity: 0.10; pointer-events: none;
+}
+.ds-hero h1 { font-size: var(--text-3xl); font-weight: 800; letter-spacing: -0.025em; }
+.ds-hero p  { font-size: var(--text-lg); opacity: 0.75; margin-top: var(--space-2); }
+.ds-tag {
+  display: inline-block;
+  background: var(--color-primary-600);
+  color: var(--color-white);
+  font-size: var(--text-xs); font-weight: 600;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.ds-section { margin-bottom: var(--space-12); }
+.ds-section-title {
+  font-size: var(--text-xl); font-weight: 700;
+  color: var(--color-gray-900);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-primary-600);
+  margin-bottom: var(--space-6);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.ds-section-title span { font-size: 1.2em; }
+.ds-row  { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; }
+.ds-col  { flex: 1 1 300px; }
+.ds-label {
+  font-size: var(--text-xs); font-weight: 600;
+  color: var(--color-gray-500); letter-spacing: 0.05em;
+  text-transform: uppercase; margin-bottom: var(--space-2);
+}
+.ds-swatch-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
+.ds-swatch {
+  width: 52px; height: 52px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgb(0 0 0 / 0.08);
+}
+.ds-swatch-label { font-size: 10px; color: var(--color-gray-500); text-align: center; margin-top: 2px; }
+
+/* ================================================================
+   NAVBAR COMPONENT
+================================================================ */
+.navbar {
+  background: var(--color-navy-900);
+  box-shadow: var(--shadow-nav);
+  padding: 0 var(--space-6);
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-6);
+}
+.navbar__brand { display: flex; align-items: center; gap: var(--space-3); }
+.navbar__logo  { font-size: 1.5rem; }
+.navbar__title {
+  color: var(--color-white); font-weight: 700;
+  font-size: var(--text-lg); letter-spacing: -0.01em;
+}
+.navbar__links { display: flex; gap: var(--space-1); list-style: none; }
+.navbar__link {
+  color: rgb(255 255 255 / 0.7);
+  font-size: var(--text-sm); font-weight: 500;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  transition: all 150ms var(--ease-default);
+}
+.navbar__link:hover { color: var(--color-white); background: rgb(255 255 255 / 0.08); }
+.navbar__link--active {
+  color: var(--color-white);
+  border-bottom: 2px solid var(--color-primary-600);
+}
+.navbar__user { color: rgb(255 255 255 / 0.7); font-size: var(--text-sm); margin-right: var(--space-2); }
+
+/* ================================================================
+   BADGES — Status
+================================================================ */
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: var(--text-xs); font-weight: 600;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.badge--abierta   { background: var(--badge-abierta-bg);   color: var(--badge-abierta-text);   border-color: var(--badge-abierta-border);   }
+.badge--cerrado   { background: var(--badge-cerrado-bg);   color: var(--badge-cerrado-text);   border-color: var(--badge-cerrado-border);   }
+.badge--pendiente { background: var(--badge-pendiente-bg); color: var(--badge-pendiente-text); border-color: var(--badge-pendiente-border); }
+.badge--finalizado{ background: var(--badge-finalizado-bg);color: var(--badge-finalizado-text);border-color: var(--badge-finalizado-border);}
+
+/* Points badges */
+.badge-pts {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--text-xs); font-weight: 700;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  min-width: 52px;
+}
+.badge-pts--zero  { background: var(--badge-0pt-bg);  color: var(--badge-0pt-text);  border-color: var(--badge-0pt-border);  }
+.badge-pts--one   { background: var(--badge-1pt-bg);  color: var(--badge-1pt-text);  border-color: var(--badge-1pt-border);  }
+.badge-pts--three { background: var(--badge-3pt-bg);  color: var(--badge-3pt-text);  border-color: var(--badge-3pt-border);  }
+
+/* ================================================================
+   BUTTONS
+================================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm); font-weight: 600;
+  padding: 0 var(--space-5);
+  height: 40px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 150ms var(--ease-default);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+.btn:focus-visible {
+  outline: 3px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+.btn--primary {
+  background: var(--color-primary-600); color: var(--color-white);
+  border-color: var(--color-primary-600);
+}
+.btn--primary:hover { background: var(--color-primary-700); border-color: var(--color-primary-700); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn--primary:active { transform: translateY(0); box-shadow: none; }
+
+.btn--secondary {
+  background: var(--color-white); color: var(--color-gray-700);
+  border-color: var(--color-gray-300);
+}
+.btn--secondary:hover { background: var(--color-gray-50); border-color: var(--color-gray-400); }
+
+.btn--ghost {
+  background: transparent; color: var(--color-white);
+  border-color: rgb(255 255 255 / 0.3);
+}
+.btn--ghost:hover { background: rgb(255 255 255 / 0.1); }
+
+.btn--danger {
+  background: #dc2626; color: var(--color-white); border-color: #dc2626;
+}
+.btn--danger:hover { background: #b91c1c; border-color: #b91c1c; }
+
+.btn--sm  { height: 32px; padding: 0 var(--space-4); font-size: var(--text-xs); }
+.btn--lg  { height: 48px; padding: 0 var(--space-6); font-size: var(--text-base); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ================================================================
+   CARDS
+================================================================ */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-gray-100);
+  transition: box-shadow var(--duration-slow) var(--ease-default),
+              transform var(--duration-slow) var(--ease-default);
+  overflow: hidden;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.card--quiniela { padding: 0; }
+.card--quiniela .card__header {
+  padding: var(--space-5) var(--space-5) var(--space-3);
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+.card__title { font-size: var(--text-base); font-weight: 700; color: var(--color-gray-900); }
+.card--quiniela .card__body { padding: var(--space-4) var(--space-5); }
+.card__meta { font-size: var(--text-sm); color: var(--color-gray-500); margin-bottom: var(--space-1); }
+.card--quiniela .card__footer {
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-gray-50);
+  border-top: 1px solid var(--color-gray-100);
+}
+
+.card--action {
+  padding: var(--space-8);
+  text-align: center;
+  cursor: pointer;
+}
+.card--action .card__icon { font-size: 2.5rem; margin-bottom: var(--space-3); }
+.card--action .card__title { font-size: var(--text-xl); margin-bottom: var(--space-2); }
+.card--action .card__description { color: var(--color-gray-500); font-size: var(--text-sm); margin-bottom: var(--space-5); }
+
+.card--auth { max-width: 420px; padding: var(--space-8); }
+.card--auth h2 { font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-6); }
+
+/* ================================================================
+   FORMS
+================================================================ */
+.form-group { margin-bottom: var(--space-5); }
+.form-label {
+  display: block;
+  font-size: var(--text-sm); font-weight: 600;
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-2);
+}
+.form-input,
+.form-select {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  color: var(--color-gray-900);
+  background: var(--color-white);
+  border: 1.5px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  height: 40px;
+  transition: border-color 150ms, box-shadow 150ms;
+  outline: none;
+}
+.form-input:hover, .form-select:hover { border-color: var(--color-gray-400); }
+.form-input:focus, .form-select:focus {
+  border-color: var(--color-primary-600);
+  box-shadow: 0 0 0 3px rgb(22 163 74 / 0.12);
+}
+.form-hint { font-size: var(--text-xs); color: var(--color-gray-500); margin-top: var(--space-1); }
+.form-group--error .form-input { border-color: #dc2626; }
+.form-group--error .form-input:focus { box-shadow: 0 0 0 3px rgb(220 38 38 / 0.12); }
+.form-error { font-size: var(--text-xs); color: #dc2626; font-weight: 500; margin-top: var(--space-1); }
+
+/* ================================================================
+   TABLE
+================================================================ */
+.table-wrapper {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-gray-100);
+  overflow: hidden;
+}
+.table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.table thead tr { background: var(--color-gray-50); }
+.table thead th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-xs); font-weight: 700;
+  color: var(--color-gray-500);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+.table tbody td { padding: var(--space-4); border-bottom: 1px solid var(--color-gray-100); }
+.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:nth-child(even) { background: var(--color-gray-50); }
+.table tbody tr:hover { background: var(--color-primary-50); }
+
+/* ================================================================
+   SHOWCASE HELPERS
+================================================================ */
+.demo-box {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-gray-100);
+  padding: var(--space-6);
+  margin-bottom: var(--space-4);
+}
+.demo-box--dark {
+  background: var(--color-navy-900);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+}
+.token-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-3);
+}
+.token-item { text-align: center; }
+.type-sample { padding: var(--space-3) 0; border-bottom: 1px solid var(--color-gray-100); }
+.type-sample:last-child { border-bottom: none; }
+.type-sample p { margin: 0; }
+.type-meta { font-size: var(--text-xs); color: var(--color-gray-400); font-family: monospace; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.empty-state {
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
+  color: var(--color-gray-500);
+}
+.empty-state__icon { font-size: 2.5rem; display: block; margin-bottom: var(--space-3); }
+.empty-state__title { font-size: var(--text-lg); font-weight: 600; color: var(--color-gray-700); margin-bottom: var(--space-2); }
+.empty-state__desc  { font-size: var(--text-sm); }
+</style>
+</head>
+<body>
+
+<!-- ========================================================
+     SHOWCASE PAGE
+======================================================== -->
+<div class="ds-page">
+
+  <!-- HERO -->
+  <div class="ds-hero">
+    <div class="ds-tag">EIF211 · UNA</div>
+    <h1>Quiniela UNA — Design System</h1>
+    <p>Tokens · Componentes · Patrones · Fútbol costarricense</p>
+  </div>
+
+  <!-- 1. COLORS -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🎨</span> Colores</h2>
+    <div class="ds-row">
+      <div class="ds-col">
+        <p class="ds-label">Primary (Green)</p>
+        <div class="ds-swatch-row">
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#f0fdf4"></div>
+            <div class="ds-swatch-label">50</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#dcfce7"></div>
+            <div class="ds-swatch-label">100</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#86efac"></div>
+            <div class="ds-swatch-label">300</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#22c55e"></div>
+            <div class="ds-swatch-label">500</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#16a34a; outline: 3px solid #16a34a; outline-offset: 2px;"></div>
+            <div class="ds-swatch-label" style="font-weight:700; color: #16a34a;">600 ★</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#15803d"></div>
+            <div class="ds-swatch-label">700</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#14532d"></div>
+            <div class="ds-swatch-label">900</div>
+          </div>
+        </div>
+      </div>
+      <div class="ds-col">
+        <p class="ds-label">Navy (Navbar)</p>
+        <div class="ds-swatch-row">
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#1e3a5f"></div>
+            <div class="ds-swatch-label">700</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#162d4a"></div>
+            <div class="ds-swatch-label">800</div>
+          </div>
+          <div class="token-item">
+            <div class="ds-swatch" style="background:#0f1f33; outline: 3px solid #0f1f33; outline-offset: 2px;"></div>
+            <div class="ds-swatch-label" style="font-weight:700">900 ★</div>
+          </div>
+        </div>
+        <p class="ds-label" style="margin-top:var(--space-4)">Neutral</p>
+        <div class="ds-swatch-row">
+          <div class="token-item"><div class="ds-swatch" style="background:#f9fafb; border:1px solid #e5e7eb"></div><div class="ds-swatch-label">50</div></div>
+          <div class="token-item"><div class="ds-swatch" style="background:#e5e7eb"></div><div class="ds-swatch-label">200</div></div>
+          <div class="token-item"><div class="ds-swatch" style="background:#6b7280"></div><div class="ds-swatch-label">500</div></div>
+          <div class="token-item"><div class="ds-swatch" style="background:#374151"></div><div class="ds-swatch-label">700</div></div>
+          <div class="token-item"><div class="ds-swatch" style="background:#111827"></div><div class="ds-swatch-label">900</div></div>
+          <div class="token-item"><div class="ds-swatch" style="background:#ffffff; border:1px solid #e5e7eb"></div><div class="ds-swatch-label">White</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. TYPOGRAPHY -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🔤</span> Tipografía · Inter</h2>
+    <div class="demo-box">
+      <div class="type-sample">
+        <p style="font-size:2.25rem; font-weight:800; letter-spacing:-0.025em; line-height:1.2">Display · 36px / 800</p>
+        <p class="type-meta">--text-4xl / font-weight: 800 · Títulos de página hero</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:1.875rem; font-weight:700; letter-spacing:-0.02em">H1 · 30px / Bold</p>
+        <p class="type-meta">--text-3xl / font-weight: 700 · Encabezados principales</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:1.5rem; font-weight:700">H2 · 24px / Bold</p>
+        <p class="type-meta">--text-2xl / font-weight: 700 · Títulos de vista</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:1.25rem; font-weight:600">H3 · 20px / Semibold</p>
+        <p class="type-meta">--text-xl / font-weight: 600 · Títulos de sección</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:1rem; font-weight:400; color:#374151">Body · 16px / Regular — El torneo de fútbol de la Universidad Nacional reúne a los mejores equipos.</p>
+        <p class="type-meta">--text-base / font-weight: 400</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:0.875rem; font-weight:400; color:#6b7280">Secondary / Small · 14px — Meta info, captions, hints</p>
+        <p class="type-meta">--text-sm / font-weight: 400</p>
+      </div>
+      <div class="type-sample">
+        <p style="font-size:0.75rem; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:#6b7280">LABEL / BADGE · 12px / Semibold</p>
+        <p class="type-meta">--text-xs / font-weight: 600 · Badges, labels, table headers</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. BADGES -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🏷️</span> Badges</h2>
+    <div class="ds-row">
+      <div class="ds-col">
+        <p class="ds-label">Estado de quiniela</p>
+        <div class="demo-box">
+          <div class="chips">
+            <span class="badge badge--abierta">Abierta</span>
+            <span class="badge badge--cerrado">Cerrado</span>
+            <span class="badge badge--pendiente">Pendiente</span>
+            <span class="badge badge--finalizado">Finalizado</span>
+          </div>
+        </div>
+      </div>
+      <div class="ds-col">
+        <p class="ds-label">Puntos de predicción</p>
+        <div class="demo-box">
+          <div class="chips">
+            <span class="badge-pts badge-pts--three">3 pts</span>
+            <span class="badge-pts badge-pts--one">1 pt</span>
+            <span class="badge-pts badge-pts--zero">0 pts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. BUTTONS -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🖱️</span> Botones</h2>
+    <div class="ds-row">
+      <div class="ds-col">
+        <p class="ds-label">Variantes</p>
+        <div class="demo-box">
+          <div class="chips" style="flex-direction:column; align-items:flex-start; gap:var(--space-3)">
+            <button class="btn btn--primary">Inscribirse</button>
+            <button class="btn btn--secondary">Cancelar</button>
+            <button class="btn btn--danger">Eliminar quiniela</button>
+            <button class="btn btn--primary" disabled>Cargando…</button>
+          </div>
+        </div>
+      </div>
+      <div class="ds-col">
+        <p class="ds-label">Tamaños</p>
+        <div class="demo-box">
+          <div class="chips" style="align-items:center">
+            <button class="btn btn--primary btn--sm">Pequeño</button>
+            <button class="btn btn--primary">Mediano</button>
+            <button class="btn btn--primary btn--lg">Grande</button>
+          </div>
+        </div>
+        <p class="ds-label" style="margin-top:var(--space-4)">Sobre fondo oscuro</p>
+        <div class="demo-box--dark">
+          <div class="chips">
+            <button class="btn btn--primary">Guardar</button>
+            <button class="btn btn--ghost">Salir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. NAVBAR -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🧭</span> Navbar</h2>
+    <nav class="navbar" aria-label="Navegación principal">
+      <div class="navbar__brand">
+        <span class="navbar__logo">⚽</span>
+        <span class="navbar__title">Quiniela UNA</span>
+      </div>
+      <ul class="navbar__links">
+        <li><a class="navbar__link" href="#">Inicio</a></li>
+        <li><a class="navbar__link navbar__link--active" href="#">Quinielas</a></li>
+        <li><a class="navbar__link" href="#">Mis Predicciones</a></li>
+      </ul>
+      <div style="display:flex; align-items:center">
+        <span class="navbar__user">👤 Bryan</span>
+        <button class="btn btn--ghost btn--sm">Salir</button>
+      </div>
+    </nav>
+    <p class="ds-label" style="margin-top:var(--space-2)">background: --color-navy-900 · active link: 2px bottom border --color-primary-600</p>
+  </section>
+
+  <!-- 6. CARDS -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>🃏</span> Cards</h2>
+    <div class="ds-row">
+      <!-- Quiniela card -->
+      <div class="ds-col">
+        <p class="ds-label">Card de quiniela (lista)</p>
+        <div class="card card--quiniela" style="max-width:340px">
+          <div class="card__header">
+            <h2 class="card__title">Quiniela Apertura 2025</h2>
+            <span class="badge badge--abierta">Abierta</span>
+          </div>
+          <div class="card__body">
+            <p class="card__meta">📅 Cierre: 15 jun 2025</p>
+            <p class="card__meta">👥 32 participantes</p>
+            <p class="card__meta">⚽ 12 partidos</p>
+          </div>
+          <div class="card__footer">
+            <button class="btn btn--primary btn--sm">Ver detalles</button>
+          </div>
+        </div>
+        <br>
+        <div class="card card--quiniela" style="max-width:340px">
+          <div class="card__header">
+            <h2 class="card__title">Liga de Ascenso 2025</h2>
+            <span class="badge badge--finalizado">Finalizado</span>
+          </div>
+          <div class="card__body">
+            <p class="card__meta">📅 Cerró: 1 mar 2025</p>
+            <p class="card__meta">👥 18 participantes</p>
+            <p class="card__meta">🏆 Ganador: Valeria R.</p>
+          </div>
+          <div class="card__footer">
+            <button class="btn btn--secondary btn--sm">Ver resultados</button>
+          </div>
+        </div>
+      </div>
+      <!-- Admin action cards -->
+      <div class="ds-col">
+        <p class="ds-label">Cards de acción (panel admin)</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:var(--space-4)">
+          <div class="card card--action">
+            <div class="card__icon">⚽</div>
+            <h3 class="card__title">Partidos</h3>
+            <p class="card__description">Registrar y gestionar partidos.</p>
+            <button class="btn btn--primary btn--sm">Administrar</button>
+          </div>
+          <div class="card card--action">
+            <div class="card__icon">🏆</div>
+            <h3 class="card__title">Quinielas</h3>
+            <p class="card__description">Crear y configurar quinielas.</p>
+            <button class="btn btn--primary btn--sm">Administrar</button>
+          </div>
+          <div class="card card--action" style="grid-column: 1/-1">
+            <div class="card__icon">📊</div>
+            <h3 class="card__title">Resultados</h3>
+            <p class="card__description">Cargar resultados y calcular puntos.</p>
+            <button class="btn btn--primary btn--sm">Administrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. FORMS -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>📝</span> Formularios</h2>
+    <div class="ds-row">
+      <div class="ds-col">
+        <p class="ds-label">Auth (Login)</p>
+        <div class="card card--auth">
+          <h2>Iniciar sesión</h2>
+          <div class="form-group">
+            <label class="form-label" for="email">Correo electrónico</label>
+            <input class="form-input" id="email" type="email" placeholder="usuario@una.cr">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pass">Contraseña</label>
+            <input class="form-input" id="pass" type="password" placeholder="••••••••">
+          </div>
+          <button class="btn btn--primary" style="width:100%">Entrar</button>
+        </div>
+      </div>
+      <div class="ds-col">
+        <p class="ds-label">Admin: Registrar partido</p>
+        <div class="demo-box">
+          <div class="form-group">
+            <label class="form-label" for="local">Equipo Local</label>
+            <input class="form-input" id="local" type="text" value="Deportivo Saprissa">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="visita">Equipo Visitante</label>
+            <input class="form-input" id="visita" type="text" placeholder="Ej: Alajuelense">
+          </div>
+          <div class="form-group form-group--error">
+            <label class="form-label" for="fecha2">Fecha y hora</label>
+            <input class="form-input" id="fecha2" type="datetime-local">
+            <span class="form-error" role="alert">La fecha es obligatoria.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="jornada">Jornada</label>
+            <select class="form-select" id="jornada">
+              <option value="">Seleccionar jornada…</option>
+              <option>Jornada 1</option>
+              <option>Jornada 2</option>
+            </select>
+            <span class="form-hint">Seleccione la jornada del torneo.</span>
+          </div>
+          <div style="display:flex; gap:var(--space-3); justify-content:flex-end">
+            <button class="btn btn--secondary">Cancelar</button>
+            <button class="btn btn--primary">Registrar Partido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. TABLE -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>📋</span> Tabla — Mis predicciones</h2>
+    <div class="table-wrapper">
+      <table class="table" aria-label="Mis predicciones">
+        <thead>
+          <tr>
+            <th scope="col">Partido</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Mi predicción</th>
+            <th scope="col">Resultado</th>
+            <th scope="col">Puntos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Saprissa vs Alajuelense</td>
+            <td>12 jun 2025</td>
+            <td>Saprissa gana</td>
+            <td>2 – 1 ✓</td>
+            <td><span class="badge-pts badge-pts--three">3 pts</span></td>
+          </tr>
+          <tr>
+            <td>Herediano vs Cartaginés</td>
+            <td>13 jun 2025</td>
+            <td>Empate</td>
+            <td>1 – 0</td>
+            <td><span class="badge-pts badge-pts--zero">0 pts</span></td>
+          </tr>
+          <tr>
+            <td>Santos vs Pérez Zeledón</td>
+            <td>14 jun 2025</td>
+            <td>Santos gana</td>
+            <td><span class="badge badge--pendiente">Pendiente</span></td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Liberia vs Guadalupe</td>
+            <td>15 jun 2025</td>
+            <td>Liberia gana</td>
+            <td>1 – 1</td>
+            <td><span class="badge-pts badge-pts--one">1 pt</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 9. EMPTY STATE -->
+  <section class="ds-section">
+    <h2 class="ds-section-title"><span>📭</span> Empty State</h2>
+    <div class="card">
+      <div class="empty-state">
+        <span class="empty-state__icon">📋</span>
+        <p class="empty-state__title">No hay quinielas activas</p>
+        <p class="empty-state__desc">Cuando se cree una quiniela, aparecerá aquí.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="text-align:center; color:var(--color-gray-400); font-size:var(--text-sm); padding-top:var(--space-8); border-top:1px solid var(--color-gray-200)">
+    Quiniela UNA · EIF211 · Universidad Nacional de Costa Rica · Design System v1.0
+  </footer>
+
+</div>
+</body>
+</html>
