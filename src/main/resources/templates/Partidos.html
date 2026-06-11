@@ -1,95 +1,388 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments :: head('Partidos - Quiniela UNA')}"></head>
+<head th:replace="~{fragments :: head('Partidos - Quiniela UNA')}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
 
-<div class="container mt-4">
-    <div th:replace="~{fragments :: alerts}"></div>
+<style>
+body { background: #f3f4f6; font-family: 'Inter','Segoe UI',system-ui,sans-serif; }
 
-    <h1 class="h3 mb-3">Partidos</h1>
+/* ── Page wrapper ────────────────────────────────────────── */
+.pt-page { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h6 mb-3">Registrar partido</h2>
-            <form th:action="@{/admin/partidos}" th:object="${partidoForm}" method="post"
-                  class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Local</label>
-                    <select class="form-select" th:field="*{idEquipoLocal}" required>
-                        <option value="">Selecciona...</option>
-                        <option th:each="e : ${equipos}"
-                                th:value="${e.idEquipo}" th:text="${e.nombre}">equipo</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Visitante</label>
-                    <select class="form-select" th:field="*{idEquipoVisita}" required>
-                        <option value="">Selecciona...</option>
-                        <option th:each="e : ${equipos}"
-                                th:value="${e.idEquipo}" th:text="${e.nombre}">equipo</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Fecha y hora</label>
-                    <input type="datetime-local" class="form-control" th:field="*{fechaHora}" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Registrar</button>
+/* ── Page header ─────────────────────────────────────────── */
+.pt-header { display: flex; align-items: center; gap: 0.875rem; margin-bottom: 1.75rem; }
+.pt-header__icon {
+    width: 44px; height: 44px; border-radius: 0.75rem;
+    background: linear-gradient(135deg, #162d4a, #0f1f33);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.375rem; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.20);
+}
+.pt-header h1 {
+    font-size: 1.5rem; font-weight: 800; color: #111827;
+    letter-spacing: -0.02em; margin: 0;
+}
+.pt-header p { font-size: 0.8125rem; color: #6b7280; margin: 0.2rem 0 0; }
+
+/* ── Alerts ──────────────────────────────────────────────── */
+.pt-alert {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    border-radius: 0.75rem; padding: 0.875rem 1.125rem;
+    margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 500;
+}
+.pt-alert--success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+.pt-alert--error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; }
+
+/* ── Register card ───────────────────────────────────────── */
+.register-card {
+    background: #ffffff; border-radius: 1rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    border: 1px solid #f1f5f9;
+    overflow: hidden; margin-bottom: 1.5rem;
+}
+.register-card__head {
+    padding: 0.875rem 1.5rem;
+    background: linear-gradient(135deg, #0f1f33, #162d4a);
+    display: flex; align-items: center; gap: 0.625rem;
+}
+.register-card__head h2 {
+    font-size: 0.9375rem; font-weight: 700; color: #ffffff; margin: 0;
+}
+.register-card__body { padding: 1.25rem 1.5rem 1.5rem; }
+
+/* Form row */
+.reg-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr auto;
+    gap: 1rem; align-items: flex-end;
+}
+.form-group { display: flex; flex-direction: column; gap: 0.375rem; }
+.form-label {
+    font-size: 0.75rem; font-weight: 700; color: #374151;
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* VS divider between team selects */
+.vs-divider {
+    display: flex; align-items: flex-end; padding-bottom: 0.625rem;
+    font-size: 0.6875rem; font-weight: 800; color: #9ca3af;
+    letter-spacing: 0.05em; text-transform: uppercase;
+}
+
+.form-select-custom,
+.form-input-custom {
+    width: 100%; font-family: inherit; font-size: 0.9375rem;
+    color: #111827; background: #f9fafb;
+    border: 1.5px solid #e5e7eb; border-radius: 0.625rem;
+    padding: 0 0.875rem; height: 42px; outline: none;
+    transition: border-color 150ms, box-shadow 150ms, background 150ms;
+    cursor: pointer;
+}
+.form-select-custom:hover, .form-input-custom:hover  { border-color: #d1d5db; background: #ffffff; }
+.form-select-custom:focus, .form-input-custom:focus  {
+    border-color: #16a34a; background: #ffffff;
+    box-shadow: 0 0 0 3px rgb(22 163 74 / 0.12);
+}
+
+.btn-register {
+    font-family: inherit; font-size: 0.875rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.625rem; height: 42px;
+    padding: 0 1.5rem; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 1px 4px rgb(22 163 74 / 0.25);
+    transition: all 150ms ease;
+}
+.btn-register:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+    transform: translateY(-1px); box-shadow: 0 3px 10px rgb(22 163 74 / 0.30);
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.section-label {
+    font-size: 0.6875rem; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+/* ── Table card ──────────────────────────────────────────── */
+.table-card {
+    background: #ffffff; border-radius: 1rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    border: 1px solid #f1f5f9; overflow: hidden;
+}
+.pt-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.pt-table thead tr { background: #f8fafc; }
+.pt-table thead th {
+    padding: 0.875rem 1rem;
+    font-size: 0.6875rem; font-weight: 700; color: #6b7280;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+}
+.pt-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 120ms;
+}
+.pt-table tbody tr:last-child { border-bottom: none; }
+.pt-table tbody tr:hover { background: #fafafa; }
+.pt-table tbody td { padding: 0.875rem 1rem; vertical-align: middle; }
+
+/* ID cell */
+.td-id { font-size: 0.75rem; color: #9ca3af; font-weight: 600; }
+
+/* Match cell */
+.match-col { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; color: #111827; }
+.match-col .vs { font-size: 0.6875rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; }
+
+/* Date cell */
+.td-date { white-space: nowrap; }
+.td-date__day  { font-weight: 600; color: #374151; font-size: 0.875rem; }
+.td-date__time { font-size: 0.75rem; color: #9ca3af; }
+
+/* Estado badges */
+.estado-badge {
+    display: inline-flex; align-items: center; gap: 0.275rem;
+    font-size: 0.6875rem; font-weight: 700;
+    padding: 0.25rem 0.625rem; border-radius: 9999px;
+    border: 1px solid transparent; white-space: nowrap; text-transform: capitalize;
+}
+.estado-badge .dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.estado-badge--pendiente  { background: #fef9c3; color: #a16207; border-color: #fde047; }
+.estado-badge--pendiente .dot  { background: #d97706; }
+.estado-badge--en_curso   { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.estado-badge--en_curso .dot   { background: #16a34a; }
+.estado-badge--finalizado { background: #1f2937; color: #f9fafb; border-color: #374151; }
+.estado-badge--finalizado .dot { background: #9ca3af; }
+
+/* Score display */
+.score-chip {
+    font-size: 1rem; font-weight: 800; color: #111827;
+    background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 0.5rem; padding: 0.2rem 0.625rem;
+    letter-spacing: -0.02em; white-space: nowrap;
+}
+.score-chip--finalizado { background: #1f2937; color: #f9fafb; border-color: #374151; }
+
+/* Inline result form */
+.result-form { display: flex; align-items: center; gap: 0.375rem; }
+.score-in {
+    width: 52px; font-family: inherit; font-size: 0.9375rem; font-weight: 700;
+    text-align: center; color: #111827; background: #ffffff;
+    border: 1.5px solid #e5e7eb; border-radius: 0.5rem;
+    padding: 0.3rem 0.25rem; height: 34px; outline: none;
+    transition: border-color 150ms, box-shadow 150ms;
+    -moz-appearance: textfield;
+}
+.score-in::-webkit-inner-spin-button,
+.score-in::-webkit-outer-spin-button { -webkit-appearance: none; }
+.score-in:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgb(22 163 74 / 0.12); }
+.score-sep { font-weight: 800; color: #9ca3af; padding: 0 0.1rem; }
+.btn-finalizar {
+    font-family: inherit; font-size: 0.6875rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.5rem; height: 34px;
+    padding: 0 0.75rem; cursor: pointer; white-space: nowrap;
+    box-shadow: 0 1px 3px rgb(22 163 74 / 0.25);
+    transition: all 120ms ease;
+}
+.btn-finalizar:hover {
+    background: linear-gradient(135deg, #15803d, #166534); transform: translateY(-1px);
+}
+.done-tag {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.75rem; font-weight: 600; color: #9ca3af;
+}
+
+/* Empty state */
+.pt-empty {
+    padding: 3rem 1.5rem; text-align: center; font-size: 0.875rem; color: #9ca3af;
+}
+.pt-empty__icon { font-size: 2.5rem; display: block; margin-bottom: 0.625rem; }
+
+/* Responsive */
+@media (max-width: 900px) {
+    .reg-form-row { grid-template-columns: 1fr 1fr; }
+    .vs-divider { display: none; }
+}
+@media (max-width: 600px) {
+    .reg-form-row { grid-template-columns: 1fr; }
+    .pt-page { padding: 1.5rem 1rem 3rem; }
+}
+</style>
+
+<div class="pt-page">
+
+    <!-- Page header -->
+    <div class="pt-header">
+        <div class="pt-header__icon" aria-hidden="true">📅</div>
+        <div>
+            <h1>Partidos</h1>
+            <p>Registra partidos y carga los marcadores finales</p>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="pt-alert pt-alert--success" th:if="${exito}" role="status">
+        <span aria-hidden="true">✅</span><span th:text="${exito}">OK</span>
+    </div>
+    <div class="pt-alert pt-alert--error" th:if="${error}" role="alert">
+        <span aria-hidden="true">⚠️</span><span th:text="${error}">Error</span>
+    </div>
+
+    <!-- ── Register form card ─────────────────────────────── -->
+    <div class="register-card">
+        <div class="register-card__head">
+            <span aria-hidden="true">➕</span>
+            <h2>Registrar nuevo partido</h2>
+        </div>
+        <div class="register-card__body">
+            <form th:action="@{/admin/partidos}" th:object="${partidoForm}" method="post" novalidate>
+                <div class="reg-form-row">
+
+                    <!-- Local -->
+                    <div class="form-group">
+                        <label class="form-label" for="idEquipoLocal">🏠 Local</label>
+                        <select class="form-select-custom" id="idEquipoLocal"
+                                th:field="*{idEquipoLocal}" required>
+                            <option value="">Selecciona equipo…</option>
+                            <option th:each="e : ${equipos}"
+                                    th:value="${e.idEquipo}"
+                                    th:text="${e.nombre}">equipo</option>
+                        </select>
+                    </div>
+
+                    <!-- VS label -->
+                    <div class="vs-divider" aria-hidden="true">VS</div>
+
+                    <!-- Visitante -->
+                    <div class="form-group">
+                        <label class="form-label" for="idEquipoVisita">✈️ Visitante</label>
+                        <select class="form-select-custom" id="idEquipoVisita"
+                                th:field="*{idEquipoVisita}" required>
+                            <option value="">Selecciona equipo…</option>
+                            <option th:each="e : ${equipos}"
+                                    th:value="${e.idEquipo}"
+                                    th:text="${e.nombre}">equipo</option>
+                        </select>
+                    </div>
+
+                    <!-- Fecha y hora -->
+                    <div class="form-group">
+                        <label class="form-label" for="fechaHora">🗓️ Fecha y hora</label>
+                        <input class="form-input-custom" id="fechaHora"
+                               type="datetime-local" th:field="*{fechaHora}" required>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="form-group" style="justify-content:flex-end">
+                        <button class="btn-register" type="submit">Registrar →</button>
+                    </div>
+
                 </div>
             </form>
         </div>
     </div>
 
-    <h2 class="h6">Partidos registrados</h2>
+    <!-- ── Partidos table ─────────────────────────────────── -->
+    <p class="section-label">Partidos registrados</p>
 
-    <div class="alert alert-info" th:if="${#lists.isEmpty(partidos)}">
-        Todavia no hay partidos registrados.
+    <!-- Empty state -->
+    <div class="table-card" th:if="${#lists.isEmpty(partidos)}">
+        <div class="pt-empty">
+            <span class="pt-empty__icon" aria-hidden="true">📋</span>
+            Aún no hay partidos registrados.
+        </div>
     </div>
 
-    <table class="table table-striped align-middle" th:unless="${#lists.isEmpty(partidos)}">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Local</th>
-            <th>Visitante</th>
-            <th>Fecha y hora</th>
-            <th>Estado</th>
-            <th>Marcador</th>
-            <th>Registrar resultado</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${partidos}">
-            <td th:text="${p.idPartido}">1</td>
-            <td th:text="${p.equipoLocal}">local</td>
-            <td th:text="${p.equipoVisita}">visita</td>
-            <td th:text="${p.fechaHora}">fecha</td>
-            <td>
-                <span class="badge"
-                      th:classappend="${p.estado == 'finalizado'} ? 'bg-dark' : (${p.estado == 'en curso'} ? 'bg-warning text-dark' : 'bg-secondary')"
-                      th:text="${p.estado}">estado</span>
-            </td>
-            <td th:text="${p.golesLocal != null} ? (${p.golesLocal} + ' - ' + ${p.golesVisita}) : '—'">—</td>
-            <td>
-                <span th:if="${p.estado == 'finalizado'}" class="text-muted">Finalizado</span>
-                <form th:unless="${p.estado == 'finalizado'}"
-                      th:action="@{/admin/partidos/{id}/resultado(id=${p.idPartido})}" method="post"
-                      class="d-flex gap-1 align-items-center">
-                    <input type="number" name="golesLocal" min="0" required
-                           class="form-control form-control-sm" style="width:64px">
-                    <span>-</span>
-                    <input type="number" name="golesVisita" min="0" required
-                           class="form-control form-control-sm" style="width:64px">
-                    <button type="submit" class="btn btn-sm btn-success">Finalizar</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+    <!-- Table -->
+    <div class="table-card" th:unless="${#lists.isEmpty(partidos)}">
+        <table class="pt-table" aria-label="Partidos registrados">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Partido</th>
+                    <th scope="col">Fecha y hora</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Marcador</th>
+                    <th scope="col">Resultado</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${partidos}">
+
+                <!-- # -->
+                <td class="td-id" th:text="${p.idPartido}">1</td>
+
+                <!-- Partido (Local vs Visitante merged) -->
+                <td>
+                    <div class="match-col">
+                        <span th:text="${p.equipoLocal}">Local</span>
+                        <span class="vs" aria-label="versus">vs</span>
+                        <span th:text="${p.equipoVisita}">Visita</span>
+                    </div>
+                </td>
+
+                <!-- Fecha formateada -->
+                <td class="td-date">
+                    <div class="td-date__day"
+                         th:text="${#temporals.format(p.fechaHora, 'dd MMM yyyy')}">fecha</div>
+                    <div class="td-date__time"
+                         th:text="${#temporals.format(p.fechaHora, 'HH:mm')}">hora</div>
+                </td>
+
+                <!-- Estado badge -->
+                <td>
+                    <span class="estado-badge"
+                          th:classappend="${p.estado == 'finalizado'} ? ' estado-badge--finalizado'
+                                        : (${p.estado == 'en curso'} ? ' estado-badge--en_curso'
+                                        : ' estado-badge--pendiente')">
+                        <span class="dot" aria-hidden="true"></span>
+                        <span th:text="${p.estado}">estado</span>
+                    </span>
+                </td>
+
+                <!-- Marcador -->
+                <td>
+                    <span class="score-chip score-chip--finalizado"
+                          th:if="${p.golesLocal != null}"
+                          th:text="${p.golesLocal + ' – ' + p.golesVisita}">x–y</span>
+                    <span th:unless="${p.golesLocal != null}" style="color:#9ca3af">—</span>
+                </td>
+
+                <!-- Resultado: form or done -->
+                <td>
+                    <span class="done-tag" th:if="${p.estado == 'finalizado'}">
+                        ✅ Finalizado
+                    </span>
+                    <form class="result-form"
+                          th:unless="${p.estado == 'finalizado'}"
+                          th:action="@{/admin/partidos/{id}/resultado(id=${p.idPartido})}"
+                          method="post">
+                        <input class="score-in" type="number"
+                               name="golesLocal" min="0" max="99"
+                               placeholder="0" required
+                               aria-label="Goles local">
+                        <span class="score-sep" aria-hidden="true">–</span>
+                        <input class="score-in" type="number"
+                               name="golesVisita" min="0" max="99"
+                               placeholder="0" required
+                               aria-label="Goles visita">
+                        <button class="btn-finalizar" type="submit">Finalizar</button>
+                    </form>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div><!-- /.pt-page -->
 
 <footer th:replace="~{fragments :: footer}"></footer>
 </body>

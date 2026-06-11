@@ -1,45 +1,374 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments :: head('Ranking - Quiniela UNA')}"></head>
+<head th:replace="~{fragments :: head('Ranking - Quiniela UNA')}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
 
-<div class="container mt-4" style="max-width: 720px;">
-    <div th:replace="~{fragments :: alerts}"></div>
+<style>
+body { background: #f3f4f6; font-family: 'Inter','Segoe UI',system-ui,sans-serif; }
 
-    <h1 class="h3" th:text="'Ranking: ' + ${quiniela.nombre}">Ranking</h1>
+/* ── Page wrapper ────────────────────────────────────────── */
+.rk-page { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
-    <div class="alert alert-info" th:if="${#lists.isEmpty(ranking)}">
-        Aun no hay participantes inscritos en esta quiniela.
+/* ── Hero header card ────────────────────────────────────── */
+.rk-hero {
+    background: linear-gradient(135deg, #0f1f33 0%, #162d4a 55%, #15803d 100%);
+    border-radius: 1rem; padding: 1.75rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 0.18);
+    position: relative; overflow: hidden;
+}
+.rk-hero::after {
+    content: '🏆';
+    position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%);
+    font-size: 6rem; opacity: 0.06; pointer-events: none; line-height: 1;
+}
+.rk-hero__left { position: relative; z-index: 1; }
+.rk-hero__eyebrow {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.6875rem; font-weight: 700; color: #4ade80;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    background: rgb(22 163 74 / 0.18); border: 1px solid rgb(22 163 74 / 0.30);
+    padding: 0.2rem 0.625rem; border-radius: 9999px;
+    margin-bottom: 0.625rem;
+}
+.rk-hero__title {
+    font-size: 1.375rem; font-weight: 800; color: #ffffff;
+    letter-spacing: -0.02em; margin: 0;
+}
+.rk-hero__sub {
+    font-size: 0.8125rem; color: rgb(255 255 255 / 0.55);
+    margin: 0.25rem 0 0;
+}
+
+/* ── Back button ─────────────────────────────────────────── */
+.btn-back {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: inherit; font-size: 0.875rem; font-weight: 600;
+    color: rgb(255 255 255 / 0.75); background: rgb(255 255 255 / 0.10);
+    border: 1.5px solid rgb(255 255 255 / 0.20); border-radius: 0.625rem;
+    height: 38px; padding: 0 1rem; text-decoration: none;
+    transition: all 150ms ease; white-space: nowrap;
+    position: relative; z-index: 1;
+}
+.btn-back:hover {
+    background: rgb(255 255 255 / 0.18); color: #ffffff;
+    border-color: rgb(255 255 255 / 0.35); text-decoration: none;
+}
+
+/* ── Alerts ──────────────────────────────────────────────── */
+.rk-alert {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    border-radius: 0.75rem; padding: 0.875rem 1.125rem;
+    margin-bottom: 1.25rem; font-size: 0.875rem; font-weight: 500;
+    background: #f0f9ff; border: 1.5px solid #bae6fd; color: #0369a1;
+}
+
+/* ── Top-3 podium strip ──────────────────────────────────── */
+.podium {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0.875rem; margin-bottom: 1.5rem;
+}
+.podium-card {
+    border-radius: 0.875rem; padding: 1.125rem 1rem 1rem;
+    text-align: center; border: 1.5px solid transparent;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    display: flex; flex-direction: column; align-items: center; gap: 0.375rem;
+}
+/* Gold */
+.podium-card--1 {
+    background: linear-gradient(160deg, #fffbeb, #fef9c3);
+    border-color: #fde047;
+    box-shadow: 0 4px 16px rgb(234 179 8 / 0.20);
+}
+/* Silver */
+.podium-card--2 {
+    background: linear-gradient(160deg, #f9fafb, #f3f4f6);
+    border-color: #d1d5db;
+}
+/* Bronze */
+.podium-card--3 {
+    background: linear-gradient(160deg, #fff7ed, #ffedd5);
+    border-color: #fdba74;
+}
+.podium-card__medal { font-size: 2rem; line-height: 1; }
+.podium-card__name  {
+    font-size: 0.875rem; font-weight: 700; color: #111827;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.podium-card--1 .podium-card__name { color: #92400e; }
+.podium-card__score {
+    font-size: 1.5rem; font-weight: 800; color: #111827; letter-spacing: -0.03em;
+}
+.podium-card--1 .podium-card__score { color: #d97706; }
+.podium-card--2 .podium-card__score { color: #6b7280; }
+.podium-card--3 .podium-card__score { color: #c2410c; }
+.podium-card__pts-label {
+    font-size: 0.6875rem; font-weight: 600; color: #6b7280; /* was #9ca3af — 2.4:1 ❌ → now 4.6:1 ✅ */
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
+/* "tú" pill on podium */
+.you-pill {
+    display: inline-flex; align-items: center;
+    font-size: 0.625rem; font-weight: 700; color: #15803d; /* was #16a34a — 3.0:1 ❌ → now 4.6:1 ✅ */
+    background: #dcfce7; border: 1px solid #86efac;
+    border-radius: 9999px; padding: 0.1rem 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ── Table card ──────────────────────────────────────────── */
+.table-card {
+    background: #ffffff; border-radius: 1rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    border: 1px solid #f1f5f9; overflow: hidden;
+}
+.rk-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.rk-table thead tr { background: #f8fafc; }
+.rk-table thead th {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.6875rem; font-weight: 700; color: #6b7280;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+}
+.rk-table tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 120ms; }
+.rk-table tbody tr:last-child { border-bottom: none; }
+
+/* Row variants */
+.rk-table tbody tr.row--odd  { background: #ffffff; }
+.rk-table tbody tr.row--even { background: #fafafa; }
+.rk-table tbody tr.row--you  { background: #f0fdf4 !important; }
+.rk-table tbody tr:hover     { background: #f3f4f6; }
+.rk-table tbody tr.row--you:hover { background: #dcfce7; }
+
+.rk-table tbody td { padding: 0.875rem 1.25rem; vertical-align: middle; }
+
+/* Position cell */
+.pos-cell { display: flex; align-items: center; gap: 0.5rem; }
+.pos-num {
+    font-size: 0.875rem; font-weight: 700;
+    color: #6b7280; min-width: 1.5rem; text-align: right;
+}
+
+/* User cell */
+.user-cell { display: flex; align-items: center; gap: 0.625rem; }
+.user-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #0f1f33, #162d4a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 800; color: #ffffff;
+    flex-shrink: 0;
+}
+.row--you .user-avatar {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+}
+.user-name { font-weight: 600; color: #111827; }
+.you-tag {
+    display: inline-flex; align-items: center;
+    font-size: 0.625rem; font-weight: 700; color: #15803d; /* was #16a34a — 3.0:1 ❌ → now 4.6:1 ✅ */
+    background: #dcfce7; border: 1px solid #86efac;
+    border-radius: 9999px; padding: 0.1rem 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-left: 0.375rem;
+}
+
+/* Score badge */
+.score-badge {
+    display: inline-flex; align-items: center;
+    font-size: 0.9375rem; font-weight: 800; color: #111827;
+    background: #f3f4f6; border: 1.5px solid #e5e7eb;
+    border-radius: 0.5rem; padding: 0.2rem 0.75rem;
+    letter-spacing: -0.02em;
+}
+.row--you .score-badge {
+    background: #dcfce7; border-color: #86efac; color: #15803d;
+}
+
+/* Pronosticados cell */
+.td-pron { color: #6b7280; font-weight: 500; }
+
+/* Empty state */
+.rk-empty {
+    padding: 3rem 1.5rem; text-align: center;
+    font-size: 0.875rem; color: #9ca3af;
+}
+.rk-empty__icon { font-size: 2.5rem; display: block; margin-bottom: 0.625rem; }
+
+/* Section label */
+.section-label {
+    font-size: 0.6875rem; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+
+/* Visually hidden (screen-reader only) */
+.sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .podium { grid-template-columns: 1fr; }
+    .rk-page { padding: 1.5rem 1rem 3rem; }
+    .rk-hero { padding: 1.25rem 1.25rem; }
+}
+</style>
+
+<div class="rk-page">
+
+    <!-- ── Hero header ────────────────────────────────────── -->
+    <div class="rk-hero">
+        <div class="rk-hero__left">
+            <div class="rk-hero__eyebrow">🏆 Clasificación</div>
+            <h1 class="rk-hero__title" th:text="${quiniela.nombre}">Quiniela</h1>
+            <p class="rk-hero__sub">Tabla de posiciones en tiempo real</p>
+        </div>
+        <a class="btn-back" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">
+            ← Volver a la quiniela
+        </a>
     </div>
 
-    <table class="table align-middle" th:unless="${#lists.isEmpty(ranking)}">
-        <thead>
-        <tr>
-            <th>Posicion</th>
-            <th>Usuario</th>
-            <th>Puntaje total</th>
-            <th>Partidos pronosticados</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="r : ${ranking}"
-            th:classappend="${r.idUsuario == miId} ? 'table-primary'">
-            <td th:text="${r.posicion}">1</td>
-            <td>
-                <span th:text="${r.nombreUsuario}">usuario</span>
-                <span class="badge bg-primary ms-1" th:if="${r.idUsuario == miId}">tu</span>
-            </td>
-            <td th:text="${r.puntajeTotal}">0</td>
-            <td th:text="${r.partidosPronosticados}">0</td>
-        </tr>
-        </tbody>
-    </table>
+    <!-- Alerts -->
+    <div class="rk-alert" th:if="${exito}" role="status">
+        <span aria-hidden="true">✅</span><span th:text="${exito}">OK</span>
+    </div>
+    <div class="rk-alert" th:if="${error}" role="alert"
+         style="background:#fef2f2;border-color:#fca5a5;color:#b91c1c;">
+        <span aria-hidden="true">⚠️</span><span th:text="${error}">Error</span>
+    </div>
 
-    <a class="btn btn-link" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">Volver a la quiniela</a>
-</div>
+    <!-- ── Empty state ─────────────────────────────────────── -->
+    <div class="table-card" th:if="${#lists.isEmpty(ranking)}">
+        <div class="rk-empty">
+            <span class="rk-empty__icon" aria-hidden="true">🏁</span>
+            Aún no hay participantes inscritos en esta quiniela.
+        </div>
+    </div>
+
+    <th:block th:unless="${#lists.isEmpty(ranking)}">
+
+        <!-- ── Top-3 podium (show only if >= 1 participant) ── -->
+        <p class="section-label">Podio</p>
+        <div class="podium">
+
+            <!-- 1st place -->
+            <div class="podium-card podium-card--1"
+                 th:with="r1=${ranking.size() >= 1 ? ranking.get(0) : null}"
+                 th:if="${ranking.size() >= 1}">
+                <span class="podium-card__medal" aria-label="Primer lugar">🥇</span>
+                <div class="podium-card__name" th:text="${ranking.get(0).nombreUsuario}">—</div>
+                <div class="podium-card__score" th:text="${ranking.get(0).puntajeTotal}">0</div>
+                <div class="podium-card__pts-label">puntos</div>
+                <span class="you-pill"
+                      th:if="${ranking.get(0).idUsuario == miId}">tú</span>
+            </div>
+            <!-- placeholder if no 1st -->
+            <div class="podium-card podium-card--1" th:unless="${ranking.size() >= 1}">
+                <span class="podium-card__medal">🥇</span>
+                <div class="podium-card__name" style="color:#d1d5db">—</div>
+            </div>
+
+            <!-- 2nd place -->
+            <div class="podium-card podium-card--2" th:if="${ranking.size() >= 2}">
+                <span class="podium-card__medal" aria-label="Segundo lugar">🥈</span>
+                <div class="podium-card__name" th:text="${ranking.get(1).nombreUsuario}">—</div>
+                <div class="podium-card__score" th:text="${ranking.get(1).puntajeTotal}">0</div>
+                <div class="podium-card__pts-label">puntos</div>
+                <span class="you-pill"
+                      th:if="${ranking.get(1).idUsuario == miId}">tú</span>
+            </div>
+            <div class="podium-card podium-card--2" th:unless="${ranking.size() >= 2}">
+                <span class="podium-card__medal">🥈</span>
+                <div class="podium-card__name" style="color:#d1d5db">—</div>
+            </div>
+
+            <!-- 3rd place -->
+            <div class="podium-card podium-card--3" th:if="${ranking.size() >= 3}">
+                <span class="podium-card__medal" aria-label="Tercer lugar">🥉</span>
+                <div class="podium-card__name" th:text="${ranking.get(2).nombreUsuario}">—</div>
+                <div class="podium-card__score" th:text="${ranking.get(2).puntajeTotal}">0</div>
+                <div class="podium-card__pts-label">puntos</div>
+                <span class="you-pill"
+                      th:if="${ranking.get(2).idUsuario == miId}">tú</span>
+            </div>
+            <div class="podium-card podium-card--3" th:unless="${ranking.size() >= 3}">
+                <span class="podium-card__medal">🥉</span>
+                <div class="podium-card__name" style="color:#d1d5db">—</div>
+            </div>
+
+        </div><!-- /.podium -->
+
+        <!-- ── Full leaderboard table ─────────────────────── -->
+        <p class="section-label">Tabla completa</p>
+        <div class="table-card">
+            <table class="rk-table" aria-label="Ranking completo">
+                <thead>
+                    <tr>
+                        <th scope="col">Pos.</th>
+                        <th scope="col">Usuario</th>
+                        <th scope="col">Puntaje total</th>
+                        <th scope="col">Pronosticados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r, stat : ${ranking}"
+                    th:classappend="${r.idUsuario == miId} ? 'row--you'
+                                  : (${stat.index % 2 == 0} ? 'row--odd' : 'row--even')">
+
+                    <!-- Posición -->
+                    <td>
+                        <div class="pos-cell">
+                            <!-- Top 3: emoji visible, text for screen readers -->
+                            <span th:if="${r.posicion == 1}" aria-hidden="true">🥇</span>
+                            <span th:if="${r.posicion == 2}" aria-hidden="true">🥈</span>
+                            <span th:if="${r.posicion == 3}" aria-hidden="true">🥉</span>
+                            <!-- SR-only position number for top 3 (emoji alone conveys nothing to AT) -->
+                            <span class="sr-only"
+                                  th:if="${r.posicion <= 3}"
+                                  th:text="${r.posicion}">1</span>
+                            <!-- Visible number for pos 4+ -->
+                            <span class="pos-num"
+                                  th:unless="${r.posicion <= 3}"
+                                  th:text="${r.posicion}">4</span>
+                        </div>
+                    </td>
+
+                    <!-- Usuario -->
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar"
+                                 aria-hidden="true"
+                                 th:text="${#strings.toUpperCase(#strings.substring(r.nombreUsuario, 0, 1))}">U</div>
+                            <span class="user-name" th:text="${r.nombreUsuario}">usuario</span>
+                            <span class="you-tag" th:if="${r.idUsuario == miId}">tú</span>
+                        </div>
+                    </td>
+
+                    <!-- Puntaje total -->
+                    <td>
+                        <span class="score-badge" th:text="${r.puntajeTotal}">0</span>
+                    </td>
+
+                    <!-- Partidos pronosticados -->
+                    <td class="td-pron" th:text="${r.partidosPronosticados}">0</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div><!-- /.table-card -->
+
+    </th:block>
+
+</div><!-- /.rk-page -->
 
 <footer th:replace="~{fragments :: footer}"></footer>
 </body>

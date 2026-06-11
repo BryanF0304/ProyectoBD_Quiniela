@@ -1,64 +1,341 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments :: head('Mis pronosticos - Quiniela UNA')}"></head>
+<head th:replace="~{fragments :: head('Mis pronosticos - Quiniela UNA')}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
 
-<div class="container mt-4" style="max-width: 820px;">
-    <div th:replace="~{fragments :: alerts}"></div>
+<style>
+body { background: #f3f4f6; font-family: 'Inter','Segoe UI',system-ui,sans-serif; }
 
-    <h1 class="h3" th:text="'Pronosticos: ' + ${quiniela.nombre}">Pronosticos</h1>
-    <p class="text-muted">Ingresa tu marcador para cada partido antes de que inicie.</p>
+/* ── Summary card ────────────────────────────────────────── */
+.pron-summary {
+    background: linear-gradient(135deg, #0f1f33 0%, #162d4a 55%, #15803d 100%);
+    border-radius: 1rem; padding: 1.5rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+    position: relative; overflow: hidden;
+}
+.pron-summary::after {
+    content: '⚽'; position: absolute; right: 1.5rem; top: 50%;
+    transform: translateY(-50%); font-size: 5rem; opacity: 0.06;
+    pointer-events: none; line-height: 1;
+}
+.pron-summary__left h1 {
+    font-size: 1.25rem; font-weight: 800; color: #ffffff;
+    letter-spacing: -0.02em; margin: 0;
+}
+.pron-summary__left p {
+    font-size: 0.8125rem; color: rgb(255 255 255 / 0.60);
+    margin: 0.25rem 0 0;
+}
+.pron-summary__stats {
+    display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.stat-pill {
+    text-align: center;
+    background: rgb(255 255 255 / 0.10);
+    border: 1px solid rgb(255 255 255 / 0.15);
+    border-radius: 0.75rem; padding: 0.6rem 1.1rem;
+    min-width: 80px;
+}
+.stat-pill__value {
+    font-size: 1.5rem; font-weight: 800; color: #ffffff;
+    letter-spacing: -0.03em; line-height: 1; display: block;
+}
+.stat-pill__label {
+    font-size: 0.6875rem; font-weight: 600; color: rgb(255 255 255 / 0.55);
+    text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem;
+}
+.stat-pill--pts .stat-pill__value { color: #fcd34d; }
 
-    <div class="alert alert-info" th:if="${#lists.isEmpty(partidos)}">
-        Esta quiniela aun no tiene partidos.
+/* ── Alerts ──────────────────────────────────────────────── */
+.pron-alert {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    border-radius: 0.75rem; padding: 0.875rem 1.125rem;
+    margin-bottom: 1.25rem; font-size: 0.875rem; font-weight: 500;
+}
+.pron-alert--success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+.pron-alert--error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; }
+
+/* ── Table card ──────────────────────────────────────────── */
+.table-card {
+    background: #ffffff; border-radius: 1rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    border: 1px solid #f1f5f9;
+    overflow: hidden; margin-bottom: 1.5rem;
+}
+.pron-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.pron-table thead tr { background: #f8fafc; }
+.pron-table thead th {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.6875rem; font-weight: 700;
+    color: #6b7280; text-transform: uppercase; letter-spacing: 0.07em;
+    border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+}
+.pron-table tbody tr { border-bottom: 1px solid #f3f4f6; transition: background 120ms; }
+.pron-table tbody tr:last-child { border-bottom: none; }
+
+/* Row states */
+.row--closed  { background: #f9fafb; }
+.row--open    { background: #ffffff; }
+.row--scored  { background: #f0fdf4; }
+.row--closed:hover  { background: #f3f4f6; }
+.row--open:hover    { background: #fafafa; }
+.row--scored:hover  { background: #dcfce7; }
+
+.pron-table tbody td { padding: 0.875rem 1.25rem; vertical-align: middle; }
+
+/* Partido cell */
+.match-cell { display: flex; flex-direction: column; gap: 0.125rem; }
+.match-cell__teams {
+    font-weight: 700; color: #111827; font-size: 0.9375rem;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.match-cell__local   { color: #111827; }
+.match-cell__vs      { font-size: 0.6875rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; }
+.match-cell__visita  { color: #111827; }
+.match-cell__closed-tag {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-size: 0.6875rem; font-weight: 600; color: #9ca3af;
+    margin-top: 0.1rem;
+}
+
+/* Date cell */
+.date-cell { white-space: nowrap; }
+.date-cell__day  { font-weight: 600; color: #374151; }
+.date-cell__time { font-size: 0.75rem; color: #9ca3af; }
+
+/* Pronostico cell */
+.pron-cell { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+
+/* Submitted score */
+.score-display {
+    font-size: 1.125rem; font-weight: 800; color: #111827;
+    letter-spacing: -0.02em;
+    background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 0.5rem; padding: 0.25rem 0.75rem;
+    white-space: nowrap;
+}
+.row--scored .score-display {
+    background: #dcfce7; border-color: #86efac; color: #15803d;
+}
+
+/* Points badges */
+.pts-badge {
+    display: inline-flex; align-items: center;
+    font-size: 0.75rem; font-weight: 800;
+    padding: 0.3rem 0.75rem; border-radius: 9999px;
+    border: 1.5px solid transparent; white-space: nowrap;
+}
+.pts-badge--three { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+.pts-badge--one   { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+.pts-badge--zero  { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+.pts-badge--pending { background: #f3f4f6; color: #6b7280; border-color: #d1d5db; }
+
+/* Inline score form */
+.score-form { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
+.score-input {
+    width: 58px; font-family: inherit; font-size: 0.9375rem; font-weight: 700;
+    text-align: center; color: #111827; background: #ffffff;
+    border: 1.5px solid #e5e7eb; border-radius: 0.5rem;
+    padding: 0.375rem 0.5rem; height: 36px; outline: none;
+    transition: border-color 150ms, box-shadow 150ms;
+    -moz-appearance: textfield;
+}
+.score-input::-webkit-inner-spin-button,
+.score-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.score-input:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgb(22 163 74 / 0.12); }
+.score-sep { font-weight: 800; color: #9ca3af; font-size: 1rem; padding: 0 0.1rem; }
+.btn-save {
+    font-family: inherit; font-size: 0.75rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.5rem; height: 36px;
+    padding: 0 0.875rem; cursor: pointer;
+    box-shadow: 0 1px 4px rgb(22 163 74 / 0.25);
+    transition: all 120ms ease; white-space: nowrap;
+}
+.btn-save:hover { background: linear-gradient(135deg, #15803d, #166534); transform: translateY(-1px); }
+
+/* Closed tag */
+.closed-tag {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.75rem; font-weight: 600; color: #9ca3af;
+    background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 0.5rem; padding: 0.3rem 0.625rem;
+}
+
+/* Empty state */
+.pron-empty {
+    padding: 3rem 1.5rem; text-align: center;
+    font-size: 0.875rem; color: #9ca3af;
+}
+.pron-empty__icon { font-size: 2.5rem; display: block; margin-bottom: 0.625rem; }
+
+/* ── Back link ───────────────────────────────────────────── */
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.875rem; font-weight: 500; color: #6b7280;
+    text-decoration: none; transition: color 150ms;
+}
+.back-link:hover { color: #16a34a; text-decoration: none; }
+</style>
+
+<div class="container mt-4 mb-5" style="max-width: 860px;">
+
+    <!-- Alerts -->
+    <div class="pron-alert pron-alert--success" th:if="${exito}" role="status">
+        <span aria-hidden="true">✅</span><span th:text="${exito}">OK</span>
+    </div>
+    <div class="pron-alert pron-alert--error" th:if="${error}" role="alert">
+        <span aria-hidden="true">⚠️</span><span th:text="${error}">Error</span>
     </div>
 
-    <table class="table align-middle" th:unless="${#lists.isEmpty(partidos)}">
-        <thead>
-        <tr>
-            <th>Partido</th>
-            <th>Fecha y hora</th>
-            <th>Tu pronostico</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${partidos}">
-            <td th:text="${p.equipoLocal + ' vs ' + p.equipoVisita}">partido</td>
-            <td th:text="${p.fechaHora}">fecha</td>
-            <td>
-                <th:block th:if="${misPronosticos.containsKey(p.idPartido)}">
-                    <strong th:text="${misPronosticos.get(p.idPartido).golesLocal + ' - ' + misPronosticos.get(p.idPartido).golesVisita}">x - y</strong>
-                    <span class="badge bg-info ms-2"
-                          th:if="${misPronosticos.get(p.idPartido).puntos != null}"
-                          th:text="${misPronosticos.get(p.idPartido).puntos + ' pts'}">pts</span>
-                </th:block>
+    <!-- ── Summary card ──────────────────────────────────── -->
+    <div class="pron-summary">
+        <div class="pron-summary__left">
+            <h1>🎯 Pronósticos</h1>
+            <p th:text="${quiniela.nombre}">Quiniela</p>
+        </div>
+        <div class="pron-summary__stats">
+            <div class="stat-pill">
+                <span class="stat-pill__value"
+                      th:text="${#lists.size(partidos)}">0</span>
+                <span class="stat-pill__label">Partidos</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-pill__value"
+                      th:text="${#maps.size(misPronosticos)}">0</span>
+                <span class="stat-pill__label">Ingresados</span>
+            </div>
+            <!-- Total pts — summed by JS from data-pts attributes -->
+            <div class="stat-pill stat-pill--pts">
+                <span class="stat-pill__value" id="total-pts">—</span>
+                <span class="stat-pill__label">Pts totales</span>
+            </div>
+        </div>
+    </div>
 
-                <th:block th:unless="${misPronosticos.containsKey(p.idPartido)}">
-                    <form th:if="${p.pronosticable}"
-                          th:action="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}"
-                          method="post" class="d-flex gap-1 align-items-center">
-                        <input type="hidden" name="idPartido" th:value="${p.idPartido}">
-                        <input type="number" name="golesLocal" min="0" required
-                               class="form-control form-control-sm" style="width:70px">
-                        <span>-</span>
-                        <input type="number" name="golesVisita" min="0" required
-                               class="form-control form-control-sm" style="width:70px">
-                        <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
-                    </form>
-                    <span class="text-muted" th:unless="${p.pronosticable}">
-                        Cerrado (ya inicio o finalizo)
-                    </span>
-                </th:block>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <!-- ── Table ─────────────────────────────────────────── -->
+    <div class="table-card">
 
-    <a class="btn btn-link" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">Volver a la quiniela</a>
+        <!-- Empty -->
+        <div class="pron-empty" th:if="${#lists.isEmpty(partidos)}">
+            <span class="pron-empty__icon" aria-hidden="true">🗓️</span>
+            Esta quiniela aún no tiene partidos asignados.
+        </div>
+
+        <table class="pron-table" th:unless="${#lists.isEmpty(partidos)}"
+               aria-label="Mis pronósticos">
+            <thead>
+                <tr>
+                    <th scope="col">Partido</th>
+                    <th scope="col">Fecha y hora</th>
+                    <th scope="col">Tu pronóstico</th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${partidos}"
+                th:with="pron=${misPronosticos.get(p.idPartido)}"
+                th:classappend="${pron != null and pron.puntos != null} ? 'row--scored'
+                              : (${pron != null} ? 'row--scored'
+                              : (${p.pronosticable} ? 'row--open' : 'row--closed'))">
+
+                <!-- Partido -->
+                <td>
+                    <div class="match-cell">
+                        <div class="match-cell__teams">
+                            <span class="match-cell__local"  th:text="${p.equipoLocal}">Local</span>
+                            <span class="match-cell__vs" aria-hidden="true">vs</span>
+                            <span class="match-cell__visita" th:text="${p.equipoVisita}">Visita</span>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- Fecha y hora — formatted -->
+                <td class="date-cell">
+                    <div class="date-cell__day"
+                         th:text="${#temporals.format(p.fechaHora, 'dd MMM')}">fecha</div>
+                    <div class="date-cell__time"
+                         th:text="${#temporals.format(p.fechaHora, 'HH:mm')}">hora</div>
+                </td>
+
+                <!-- Tu pronóstico -->
+                <td>
+                    <!-- Has pronóstico -->
+                    <th:block th:if="${pron != null}">
+                        <div class="pron-cell">
+                            <span class="score-display"
+                                  th:text="${pron.golesLocal + ' – ' + pron.golesVisita}">x–y</span>
+
+                            <!-- Points badge — 3pts gold, 1pt blue, 0pts red, null=pending -->
+                            <span class="pts-badge pts-badge--three"
+                                  th:if="${pron.puntos == 3}"
+                                  data-pts="3">🥇 3 pts</span>
+                            <span class="pts-badge pts-badge--one"
+                                  th:if="${pron.puntos == 1}"
+                                  data-pts="1">1 pt</span>
+                            <span class="pts-badge pts-badge--zero"
+                                  th:if="${pron.puntos == 0}"
+                                  data-pts="0">0 pts</span>
+                            <span class="pts-badge pts-badge--pending"
+                                  th:if="${pron.puntos == null}">
+                                ⏳ pendiente
+                            </span>
+                        </div>
+                    </th:block>
+
+                    <!-- No pronóstico — open to predict -->
+                    <th:block th:unless="${pron != null}">
+                        <form th:if="${p.pronosticable}"
+                              th:action="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}"
+                              method="post">
+                            <input type="hidden" name="idPartido" th:value="${p.idPartido}">
+                            <div class="score-form">
+                                <input class="score-input" type="number"
+                                       name="golesLocal" min="0" max="99"
+                                       placeholder="0" required
+                                       aria-label="Goles local">
+                                <span class="score-sep" aria-hidden="true">–</span>
+                                <input class="score-input" type="number"
+                                       name="golesVisita" min="0" max="99"
+                                       placeholder="0" required
+                                       aria-label="Goles visita">
+                                <button class="btn-save" type="submit">Guardar</button>
+                            </div>
+                        </form>
+                        <span class="closed-tag" th:unless="${p.pronosticable}">
+                            🔒 Cerrado
+                        </span>
+                    </th:block>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div><!-- /.table-card -->
+
+    <a class="back-link" th:href="@{/quinielas/{id}(id=${quiniela.idQuiniela})}">
+        ← Volver a la quiniela
+    </a>
+
 </div>
+
+<!-- Sum pts badges via JS -->
+<script>
+(function () {
+    var badges = document.querySelectorAll('[data-pts]');
+    var total = 0;
+    badges.forEach(function (el) { total += parseInt(el.getAttribute('data-pts'), 10) || 0; });
+    var el = document.getElementById('total-pts');
+    if (el) el.textContent = badges.length ? total : '—';
+})();
+</script>
 
 <footer th:replace="~{fragments :: footer}"></footer>
 </body>

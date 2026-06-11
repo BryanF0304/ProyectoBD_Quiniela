@@ -1,115 +1,530 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{fragments :: head('Quiniela - Quiniela UNA')}"></head>
+<head th:replace="~{fragments :: head('Quiniela - Quiniela UNA')}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
 
 <body>
 <nav th:replace="~{fragments :: navbar}"></nav>
 
-<div class="container mt-4" style="max-width: 760px;">
-    <div th:replace="~{fragments :: alerts}"></div>
+<!-- ── Custom styles ─────────────────────────────────────── -->
+<style>
+body { background: #f3f4f6; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
 
-    <div class="d-flex justify-content-between align-items-start">
-        <h1 class="h3" th:text="${quiniela.nombre}">Nombre</h1>
-        <span class="badge"
-              th:classappend="${quiniela.estado == 'abierta'} ? 'bg-success' : (${quiniela.estado == 'finalizada'} ? 'bg-dark' : 'bg-secondary')"
-              th:text="${quiniela.estado}">estado</span>
+/* ── Hero header ─────────────────────────────────────────── */
+.qd-hero {
+    background: linear-gradient(135deg, #0f1f33 0%, #162d4a 60%, #15803d 100%);
+    color: #ffffff;
+    padding: 2.25rem 0 2rem;
+    margin-bottom: 0;
+    position: relative; overflow: hidden;
+}
+.qd-hero::before {
+    content: '⚽';
+    position: absolute; right: 5%; top: 50%; transform: translateY(-50%);
+    font-size: 7rem; opacity: 0.06; pointer-events: none;
+    line-height: 1;
+}
+.qd-hero__inner {
+    max-width: 800px; margin: 0 auto;
+    padding: 0 1.5rem;
+}
+.qd-hero__top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1rem; margin-bottom: 0.375rem;
+}
+.qd-hero__name {
+    font-size: 2rem; font-weight: 800; letter-spacing: -0.025em;
+    color: #ffffff; margin: 0;
+}
+.qd-hero__desc {
+    font-size: 0.9375rem; color: rgb(255 255 255 / 0.65);
+    margin: 0.25rem 0 1.25rem;
+}
+.qd-hero__actions { display: flex; align-items: center; gap: 0.75rem; }
+
+/* Status badge in hero */
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.75rem; font-weight: 700;
+    padding: 0.3rem 0.75rem; border-radius: 9999px;
+    border: 1.5px solid transparent; white-space: nowrap;
+    letter-spacing: 0.03em; text-transform: capitalize;
+}
+.hero-badge--abierta    { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.hero-badge--cerrada    { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+.hero-badge--pendiente  { background: #fef9c3; color: #a16207; border-color: #fde047; }
+.hero-badge--finalizada { background: #1f2937; color: #f9fafb; border-color: #374151; }
+.hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.hero-badge--abierta .dot    { background: #16a34a; }
+.hero-badge--cerrada .dot    { background: #6b7280; }
+.hero-badge--pendiente .dot  { background: #d97706; }
+.hero-badge--finalizada .dot { background: #9ca3af; }
+
+.btn-ranking {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-family: inherit; font-size: 0.8125rem; font-weight: 600;
+    color: #ffffff;
+    background: rgb(255 255 255 / 0.12);
+    border: 1.5px solid rgb(255 255 255 / 0.25);
+    border-radius: 0.5rem; padding: 0.4rem 1rem; height: 36px;
+    text-decoration: none; cursor: pointer;
+    transition: all 150ms ease;
+}
+.btn-ranking:hover {
+    background: rgb(255 255 255 / 0.20); color: #ffffff;
+    text-decoration: none; border-color: rgb(255 255 255 / 0.45);
+}
+
+/* ── Page wrapper ────────────────────────────────────────── */
+.qd-page { max-width: 800px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+
+/* ── Section card ────────────────────────────────────────── */
+.section-card {
+    background: #ffffff; border-radius: 0.875rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    border: 1px solid #f1f5f9;
+    margin-bottom: 1.25rem; overflow: hidden;
+}
+.section-card__head {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.section-title {
+    font-size: 0.9375rem; font-weight: 700; color: #111827;
+    letter-spacing: -0.01em; margin: 0;
+    display: flex; align-items: center; gap: 0.5rem;
+}
+.section-count {
+    background: #f3f4f6; color: #6b7280;
+    font-size: 0.6875rem; font-weight: 700;
+    padding: 0.15rem 0.5rem; border-radius: 9999px;
+}
+
+/* ── Alerts ──────────────────────────────────────────────── */
+.qd-alert {
+    display: flex; align-items: flex-start; gap: 0.625rem;
+    border-radius: 0.75rem; padding: 0.875rem 1.125rem;
+    margin-bottom: 1.25rem; font-size: 0.875rem; font-weight: 500;
+}
+.qd-alert--success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+.qd-alert--error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; }
+
+/* ── Info grid ───────────────────────────────────────────── */
+.info-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0; padding: 0;
+}
+.info-cell {
+    padding: 1rem 1.25rem;
+    border-right: 1px solid #f3f4f6;
+    border-bottom: 1px solid #f3f4f6;
+}
+.info-cell:last-child { border-right: none; }
+.info-cell__label {
+    font-size: 0.6875rem; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem;
+}
+.info-cell__value { font-size: 0.875rem; font-weight: 600; color: #111827; }
+.info-cell__value--muted { color: #6b7280; font-weight: 400; }
+.info-dates { display: flex; align-items: center; gap: 0.375rem; flex-wrap: wrap; }
+.date-chip {
+    background: #f3f4f6; border-radius: 0.375rem;
+    padding: 0.15rem 0.5rem; font-size: 0.75rem; font-weight: 500; color: #374151;
+}
+.reglas-box {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.8125rem; color: #6b7280; line-height: 1.6;
+    border-top: 1px solid #f3f4f6;
+}
+.reglas-box__label { font-weight: 700; color: #374151; margin-bottom: 0.25rem; font-size: 0.8125rem; }
+
+/* ── Match cards ─────────────────────────────────────────── */
+.match-item {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem; align-items: center;
+}
+.match-item:last-child { border-bottom: none; }
+.match-teams {
+    display: flex; align-items: center; gap: 0.625rem;
+    font-size: 0.9375rem;
+}
+.match-team { font-weight: 700; color: #111827; }
+.match-vs {
+    font-size: 0.6875rem; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
+.match-dt {
+    font-size: 0.75rem; color: #9ca3af;
+    margin-top: 0.2rem; display: flex; align-items: center; gap: 0.25rem;
+}
+.match-right {
+    display: flex; align-items: center; gap: 0.75rem;
+    justify-content: flex-end;
+}
+.match-score {
+    font-size: 1.25rem; font-weight: 800; color: #111827;
+    letter-spacing: -0.03em; white-space: nowrap;
+    background: #f8fafc; border: 1px solid #e5e7eb;
+    border-radius: 0.5rem; padding: 0.2rem 0.625rem;
+    min-width: 4rem; text-align: center;
+}
+.match-badge {
+    display: inline-flex; align-items: center;
+    font-size: 0.6875rem; font-weight: 700;
+    padding: 0.2rem 0.625rem; border-radius: 9999px;
+    border: 1px solid transparent; white-space: nowrap;
+    text-transform: capitalize;
+}
+.match-badge--pendiente  { background: #fef9c3; color: #a16207; border-color: #fde047; }
+.match-badge--finalizado { background: #1f2937; color: #f9fafb; border-color: #374151; }
+.match-badge--en_juego   { background: #dcfce7; color: #15803d; border-color: #86efac; }
+.match-empty {
+    padding: 2rem 1.25rem; text-align: center;
+    font-size: 0.875rem; color: #9ca3af;
+}
+.match-empty__icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+
+/* ── Admin panel ─────────────────────────────────────────── */
+.admin-panel {
+    background: #fffbeb; border: 1.5px solid #fde68a;
+    border-radius: 0.875rem; padding: 1.125rem 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.admin-label {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.6875rem; font-weight: 700; color: #92400e;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    background: #fef3c7; border: 1px solid #fcd34d;
+    padding: 0.2rem 0.625rem; border-radius: 9999px;
+    margin-bottom: 0.875rem;
+}
+.admin-form-row {
+    display: flex; gap: 0.75rem; align-items: flex-end;
+}
+.admin-select {
+    flex: 1; font-family: inherit; font-size: 0.875rem;
+    color: #111827; background: #ffffff;
+    border: 1.5px solid #e5e7eb; border-radius: 0.625rem;
+    padding: 0 0.875rem; height: 40px; outline: none;
+    transition: border-color 150ms;
+}
+.admin-select:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgb(22 163 74 / 0.12); }
+.btn-add {
+    font-family: inherit; font-size: 0.875rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.625rem; height: 40px;
+    padding: 0 1.25rem; cursor: pointer; white-space: nowrap;
+    transition: all 150ms ease;
+}
+.btn-add:hover { background: linear-gradient(135deg, #15803d, #166534); transform: translateY(-1px); }
+.admin-hint { font-size: 0.75rem; color: #92400e; margin-top: 0.625rem; }
+
+/* ── Participants ─────────────────────────────────────────── */
+.participants-grid {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    padding: 1rem 1.25rem;
+}
+.participant-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: #f3f4f6; border: 1px solid #e5e7eb;
+    border-radius: 9999px; padding: 0.3rem 0.75rem;
+    font-size: 0.8125rem; font-weight: 500; color: #374151;
+}
+.participant-chip__avatar {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: #fff; font-size: 0.625rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.participants-empty { padding: 1.25rem; font-size: 0.875rem; color: #9ca3af; }
+
+/* ── Action section (inscription CTA) ───────────────────── */
+.action-inscrito {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1.5px solid #86efac; border-radius: 0.875rem;
+    padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+.action-inscrito__text { font-size: 0.9375rem; font-weight: 600; color: #15803d; }
+.action-inscrito__sub  { font-size: 0.8125rem; color: #16a34a; margin-top: 0.125rem; }
+.btn-pronosticos {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-family: inherit; font-size: 0.875rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.625rem; height: 40px;
+    padding: 0 1.25rem; text-decoration: none; cursor: pointer;
+    box-shadow: 0 2px 8px rgb(22 163 74 / 0.30);
+    transition: all 150ms ease; white-space: nowrap;
+}
+.btn-pronosticos:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+    color: #ffffff; text-decoration: none; transform: translateY(-1px);
+}
+
+.action-inscribirse {
+    background: #ffffff; border: 1px solid #f1f5f9;
+    border-radius: 0.875rem; box-shadow: 0 2px 8px rgb(0 0 0 / 0.07);
+    overflow: hidden; margin-bottom: 1.25rem;
+}
+.inscribirse-header {
+    background: linear-gradient(135deg, #0f1f33, #162d4a);
+    padding: 1.125rem 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+}
+.inscribirse-header h2 {
+    font-size: 1rem; font-weight: 700; color: #ffffff;
+    margin: 0; letter-spacing: -0.01em;
+}
+.inscribirse-body { padding: 1.25rem 1.5rem; }
+.checkbox-row {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    margin-bottom: 1.125rem;
+}
+.checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0;
+    accent-color: #16a34a; cursor: pointer;
+}
+.checkbox-row label { font-size: 0.875rem; color: #374151; cursor: pointer; line-height: 1.5; }
+.btn-inscribirse {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: inherit; font-size: 0.9375rem; font-weight: 700;
+    color: #ffffff; background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 0.625rem; height: 46px;
+    padding: 0 1.75rem; cursor: pointer;
+    box-shadow: 0 2px 10px rgb(22 163 74 / 0.30);
+    transition: all 150ms ease;
+}
+.btn-inscribirse:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgb(22 163 74 / 0.35);
+}
+
+.action-cerrada {
+    background: #fffbeb; border: 1.5px solid #fde68a;
+    border-radius: 0.875rem; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 0.625rem;
+    font-size: 0.875rem; color: #92400e; font-weight: 500;
+    margin-bottom: 1.25rem;
+}
+
+/* ── Back link ───────────────────────────────────────────── */
+.back-link {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.875rem; font-weight: 500; color: #6b7280;
+    text-decoration: none; transition: color 150ms;
+}
+.back-link:hover { color: #16a34a; text-decoration: none; }
+</style>
+
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<div class="qd-hero">
+    <div class="qd-hero__inner">
+        <div class="qd-hero__top">
+            <h1 class="qd-hero__name" th:text="${quiniela.nombre}">Nombre</h1>
+            <span class="hero-badge"
+                  th:classappend="'hero-badge--' + ${quiniela.estado}">
+                <span class="dot" aria-hidden="true"></span>
+                <span th:text="${quiniela.estado}">estado</span>
+            </span>
+        </div>
+        <p class="qd-hero__desc"
+           th:if="${quiniela.descripcion != null and !quiniela.descripcion.isEmpty()}"
+           th:text="${quiniela.descripcion}">Descripción</p>
+        <div class="qd-hero__actions">
+            <a class="btn-ranking"
+               th:href="@{/quinielas/{id}/ranking(id=${quiniela.idQuiniela})}">
+                🏆 Ver ranking
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ── Page body ─────────────────────────────────────────── -->
+<div class="qd-page">
+
+    <!-- Alerts -->
+    <div class="qd-alert qd-alert--success" th:if="${exito}" role="status">
+        <span aria-hidden="true">✅</span>
+        <span th:text="${exito}">Operación exitosa.</span>
+    </div>
+    <div class="qd-alert qd-alert--error" th:if="${error}" role="alert">
+        <span aria-hidden="true">⚠️</span>
+        <span th:text="${error}">Error.</span>
     </div>
 
-    <p class="text-muted" th:text="${quiniela.descripcion}">Descripcion</p>
-
-    <a class="btn btn-outline-secondary btn-sm mb-3"
-       th:href="@{/quinielas/{id}/ranking(id=${quiniela.idQuiniela})}">Ver ranking</a>
-
-    <div class="card mb-3">
-        <div class="card-body">
-            <ul class="list-unstyled mb-2">
-                <li><strong>Modalidad:</strong> <span th:text="${quiniela.modalidad}">m</span></li>
-                <li><strong>Inscripciones:</strong>
-                    <span th:text="${quiniela.fechaInicio}">inicio</span> a
-                    <span th:text="${quiniela.fechaCierre}">cierre</span></li>
-                <li><strong>Tipo de puntuacion:</strong> <span th:text="${quiniela.tipoPuntuacion}">t</span></li>
-            </ul>
-            <div th:if="${quiniela.reglas != null and !quiniela.reglas.isEmpty()}">
-                <strong>Reglas:</strong>
-                <p class="mb-0" th:text="${quiniela.reglas}">reglas</p>
+    <!-- ── Info card ─────────────────────────────────────── -->
+    <div class="section-card">
+        <div class="info-grid">
+            <!-- Modalidad -->
+            <div class="info-cell">
+                <div class="info-cell__label">🏟️ Modalidad</div>
+                <div class="info-cell__value" th:text="${quiniela.modalidad}">—</div>
+            </div>
+            <!-- Inscripciones -->
+            <div class="info-cell">
+                <div class="info-cell__label">📅 Inscripciones</div>
+                <div class="info-dates">
+                    <span class="date-chip"
+                          th:text="${#temporals.format(quiniela.fechaInicio, 'dd/MM/yyyy')}">inicio</span>
+                    <span style="color:#9ca3af; font-size:.75rem">→</span>
+                    <span class="date-chip"
+                          th:text="${#temporals.format(quiniela.fechaCierre, 'dd/MM/yyyy')}">cierre</span>
+                </div>
+            </div>
+            <!-- Puntuación -->
+            <div class="info-cell" style="border-right:none">
+                <div class="info-cell__label">🎯 Puntuación</div>
+                <div class="info-cell__value" th:text="${quiniela.tipoPuntuacion}">—</div>
             </div>
         </div>
+        <!-- Reglas -->
+        <div class="reglas-box"
+             th:if="${quiniela.reglas != null and !quiniela.reglas.isEmpty()}">
+            <div class="reglas-box__label">📋 Reglas</div>
+            <span th:text="${quiniela.reglas}">—</span>
+        </div>
     </div>
 
-    <h2 class="h5">Partidos</h2>
-    <ul class="list-group mb-3" th:if="${not #lists.isEmpty(partidos)}">
-        <li class="list-group-item d-flex justify-content-between align-items-center"
-            th:each="p : ${partidos}">
-            <span>
-                <span th:text="${p.equipoLocal}">L</span> vs <span th:text="${p.equipoVisita}">V</span>
-                <small class="text-muted ms-2" th:text="${p.fechaHora}">fecha</small>
-            </span>
-            <span>
-                <span class="badge bg-secondary" th:text="${p.estado}">estado</span>
-                <span class="ms-2" th:if="${p.golesLocal != null}"
-                      th:text="${p.golesLocal + ' - ' + p.golesVisita}">x - y</span>
-            </span>
-        </li>
-    </ul>
-    <p class="text-muted" th:if="${#lists.isEmpty(partidos)}">Esta quiniela aun no tiene partidos.</p>
+    <!-- ── Partidos ──────────────────────────────────────── -->
+    <div class="section-card">
+        <div class="section-card__head">
+            <h2 class="section-title">
+                ⚽ Partidos
+                <span class="section-count" th:text="${#lists.size(partidos)}">0</span>
+            </h2>
+        </div>
 
-    <div th:if="${session.usuario.esAdministrador()}" class="card mb-3">
-        <div class="card-body">
-            <h2 class="h6">Agregar partido (admin)</h2>
-            <form th:action="@{/admin/quinielas/{id}/partidos(id=${quiniela.idQuiniela})}" method="post"
-                  class="row g-2 align-items-end">
-                <div class="col-md-9">
-                    <select class="form-select" name="idPartido" required>
-                        <option value="">Selecciona un partido...</option>
-                        <option th:each="d : ${disponibles}" th:value="${d.idPartido}"
-                                th:text="${d.equipoLocal + ' vs ' + d.equipoVisita + ' (' + d.fechaHora + ')'}">partido</option>
-                    </select>
+        <!-- Match list -->
+        <div th:if="${not #lists.isEmpty(partidos)}">
+            <div class="match-item" th:each="p : ${partidos}">
+                <div>
+                    <div class="match-teams">
+                        <span class="match-team" th:text="${p.equipoLocal}">Local</span>
+                        <span class="match-vs">vs</span>
+                        <span class="match-team" th:text="${p.equipoVisita}">Visita</span>
+                    </div>
+                    <div class="match-dt">
+                        <span aria-hidden="true">🕐</span>
+                        <span th:text="${#temporals.format(p.fechaHora, 'dd/MM/yyyy HH:mm')}">fecha</span>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100">Agregar</button>
+                <div class="match-right">
+                    <span class="match-badge"
+                          th:classappend="'match-badge--' + ${p.estado}"
+                          th:text="${p.estado}">estado</span>
+                    <span class="match-score"
+                          th:if="${p.golesLocal != null}"
+                          th:text="${p.golesLocal + ' – ' + p.golesVisita}">x – y</span>
                 </div>
-            </form>
-            <p class="text-muted small mb-0 mt-2" th:if="${#lists.isEmpty(disponibles)}">
-                No hay partidos disponibles. Crea partidos en Admin &rarr; Partidos.
+            </div>
+        </div>
+
+        <!-- Empty -->
+        <div class="match-empty" th:if="${#lists.isEmpty(partidos)}">
+            <span class="match-empty__icon" aria-hidden="true">🗓️</span>
+            Esta quiniela aún no tiene partidos asignados.
+        </div>
+    </div>
+
+    <!-- ── Admin: agregar partido ────────────────────────── -->
+    <div th:if="${session.usuario.esAdministrador()}" class="admin-panel">
+        <div class="admin-label">⚙️ Administrador</div>
+        <form th:action="@{/admin/quinielas/{id}/partidos(id=${quiniela.idQuiniela})}"
+              method="post">
+            <div class="admin-form-row">
+                <select class="admin-select" name="idPartido" required>
+                    <option value="">Selecciona un partido…</option>
+                    <option th:each="d : ${disponibles}"
+                            th:value="${d.idPartido}"
+                            th:text="${d.equipoLocal + ' vs ' + d.equipoVisita + ' — ' + #temporals.format(d.fechaHora, 'dd/MM HH:mm')}">partido</option>
+                </select>
+                <button class="btn-add" type="submit">+ Agregar</button>
+            </div>
+            <p class="admin-hint" th:if="${#lists.isEmpty(disponibles)}">
+                Sin partidos disponibles. Crea partidos en <strong>Admin → Partidos</strong>.
             </p>
+        </form>
+    </div>
+
+    <!-- ── Participantes ─────────────────────────────────── -->
+    <div class="section-card">
+        <div class="section-card__head">
+            <h2 class="section-title">
+                👥 Participantes
+                <span class="section-count" th:text="${#lists.size(participantes)}">0</span>
+            </h2>
         </div>
+        <div class="participants-grid" th:if="${not #lists.isEmpty(participantes)}">
+            <span class="participant-chip" th:each="p : ${participantes}">
+                <span class="participant-chip__avatar"
+                      th:text="${#strings.toUpperCase(#strings.substring(p, 0, 1))}">A</span>
+                <span th:text="${p}">usuario</span>
+            </span>
+        </div>
+        <p class="participants-empty" th:if="${#lists.isEmpty(participantes)}">
+            Aún no hay participantes inscritos.
+        </p>
     </div>
 
-    <h2 class="h5">Participantes (<span th:text="${#lists.size(participantes)}">0</span>)</h2>
-    <ul class="list-group mb-3" th:if="${not #lists.isEmpty(participantes)}">
-        <li class="list-group-item" th:each="p : ${participantes}" th:text="${p}">usuario</li>
-    </ul>
-    <p class="text-muted" th:if="${#lists.isEmpty(participantes)}">Aun no hay inscritos.</p>
+    <!-- ── Action section ────────────────────────────────── -->
 
-    <div th:if="${inscrito}" class="alert alert-info d-flex justify-content-between align-items-center">
-        <span>Ya estas inscrito en esta quiniela.</span>
-        <a class="btn btn-sm btn-primary"
-           th:href="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}">Mis pronosticos</a>
+    <!-- Already enrolled -->
+    <div class="action-inscrito" th:if="${inscrito}">
+        <div>
+            <div class="action-inscrito__text">✅ Ya estás inscrito en esta quiniela</div>
+            <div class="action-inscrito__sub">Puedes ver y actualizar tus pronósticos</div>
+        </div>
+        <a class="btn-pronosticos"
+           th:href="@{/quinielas/{id}/pronosticos(id=${quiniela.idQuiniela})}">
+            🎯 Mis pronósticos
+        </a>
     </div>
 
-    <div th:if="${not inscrito and quiniela.estado == 'abierta'}" class="card">
-        <div class="card-body">
-            <h2 class="h6">Inscribirme</h2>
-            <form th:action="@{/quinielas/{id}/inscribir(id=${quiniela.idQuiniela})}" method="post">
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox"
-                           name="aceptoReglas" value="true" id="acepto">
-                    <label class="form-check-label" for="acepto">
-                        Acepto las reglas de la quiniela
-                    </label>
+    <!-- Enroll form (open) -->
+    <div class="action-inscribirse"
+         th:if="${not inscrito and quiniela.estado == 'abierta'}">
+        <div class="inscribirse-header">
+            <span aria-hidden="true" style="font-size:1.375rem">⚽</span>
+            <h2>¡Únete a esta quiniela!</h2>
+        </div>
+        <div class="inscribirse-body">
+            <form th:action="@{/quinielas/{id}/inscribir(id=${quiniela.idQuiniela})}"
+                  method="post">
+                <div class="checkbox-row">
+                    <input type="checkbox" name="aceptoReglas" value="true" id="acepto" required>
+                    <label for="acepto">Acepto las reglas de la quiniela y me comprometo a ingresar mis pronósticos antes del cierre.</label>
                 </div>
-                <button type="submit" class="btn btn-primary">Inscribirme</button>
+                <button class="btn-inscribirse" type="submit">
+                    Inscribirme al torneo →
+                </button>
             </form>
         </div>
     </div>
 
-    <div th:if="${not inscrito and quiniela.estado != 'abierta'}" class="alert alert-warning">
-        Las inscripciones para esta quiniela estan cerradas.
+    <!-- Closed -->
+    <div class="action-cerrada"
+         th:if="${not inscrito and quiniela.estado != 'abierta'}">
+        <span aria-hidden="true">🔒</span>
+        Las inscripciones para esta quiniela están cerradas.
     </div>
 
-    <a class="btn btn-link mt-3 d-block" th:href="@{/quinielas}">Volver a quinielas</a>
-</div>
+    <!-- Back link -->
+    <a class="back-link" th:href="@{/quinielas}">
+        ← Volver a quinielas
+    </a>
+
+</div><!-- /.qd-page -->
 
 <footer th:replace="~{fragments :: footer}"></footer>
 </body>
